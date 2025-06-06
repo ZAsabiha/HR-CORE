@@ -2,19 +2,13 @@ import React, { useState } from 'react';
 import { User, Lock } from 'lucide-react';
 
 const LoginForm = () => {
-  const [formData, setFormData] = useState({
-    username: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ username: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (error) setError('');
   };
 
@@ -30,9 +24,7 @@ const LoginForm = () => {
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
@@ -40,7 +32,6 @@ const LoginForm = () => {
 
       if (response.ok) {
         console.log('Login successful:', data);
-        // Handle successful login - redirect or update state
       } else {
         setError(data.message || 'Login failed. Please try again.');
       }
@@ -53,8 +44,7 @@ const LoginForm = () => {
   };
 
   const handleSignUp = () => {
-    console.log('Navigate to sign up');
-    // Add navigation logic here
+    window.location.href = '/signup';
   };
 
   const handleKeyPress = (e) => {
@@ -115,13 +105,19 @@ const LoginForm = () => {
     inputGroup: {
       position: 'relative'
     },
-    iconContainer: {
+    inputWrapper: {
+      position: 'relative'
+    },
+    icon: {
       position: 'absolute',
       left: '0.75rem',
       top: '50%',
       transform: 'translateY(-50%)',
-      pointerEvents: 'none',
-      zIndex: 1
+      width: '20px',
+      height: '20px',
+      color: '#9ca3af',
+      zIndex: 1,
+      pointerEvents: 'none'
     },
     input: {
       display: 'block',
@@ -134,15 +130,9 @@ const LoginForm = () => {
       borderBottom: '2px solid #d1d5db',
       backgroundColor: 'transparent',
       outline: 'none',
-      transition: 'border-color 0.2s ease',
       fontSize: '1rem',
-      color: '#111827'
-    },
-    inputFocus: {
-      borderBottomColor: '#0C3D4A'
-    },
-    placeholder: {
-      color: '#9ca3af'
+      color: '#111827',
+      boxSizing: 'border-box'
     },
     button: {
       width: '100%',
@@ -153,12 +143,8 @@ const LoginForm = () => {
       border: 'none',
       borderRadius: '9999px',
       cursor: 'pointer',
-      transition: 'background-color 0.2s ease',
       fontSize: '1rem',
       marginTop: '0.5rem'
-    },
-    buttonHover: {
-      backgroundColor: '#0a2f3a'
     },
     buttonDisabled: {
       backgroundColor: '#4a9ba8',
@@ -176,78 +162,63 @@ const LoginForm = () => {
       fontWeight: '600',
       textDecoration: 'none',
       marginLeft: '0.25rem',
-      cursor: 'pointer',
-      transition: 'color 0.2s ease'
-    },
-    signupLinkHover: {
-      color: '#0a2f3a',
-      textDecoration: 'underline'
+      cursor: 'pointer'
     }
   };
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        {/* Header */}
         <div style={styles.header}>
           <h1 style={styles.title}>Login</h1>
           <div style={styles.underline}></div>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div style={styles.errorMessage}>
-            {error}
-          </div>
-        )}
+        {error && <div style={styles.errorMessage}>{error}</div>}
 
-        {/* Login Form */}
         <div style={styles.formContainer}>
-          {/* Username Field */}
           <div style={styles.inputGroup}>
-            <div style={styles.iconContainer}>
-              <User size={20} color="#9ca3af" />
+            <div style={styles.inputWrapper}>
+              <User style={styles.icon} />
+              <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                value={formData.username}
+                onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
+                style={styles.input}
+                onFocus={(e) => {
+                  e.target.style.borderBottomColor = '#0C3D4A';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderBottomColor = '#d1d5db';
+                }}
+              />
             </div>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleInputChange}
-              onKeyPress={handleKeyPress}
-              placeholder="Username"
-              style={styles.input}
-              onFocus={(e) => {
-                e.target.style.borderBottomColor = '#0C3D4A';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderBottomColor = '#d1d5db';
-              }}
-            />
           </div>
 
-          {/* Password Field */}
           <div style={styles.inputGroup}>
-            <div style={styles.iconContainer}>
-              <Lock size={20} color="#9ca3af" />
+            <div style={styles.inputWrapper}>
+              <Lock style={styles.icon} />
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
+                style={styles.input}
+                onFocus={(e) => {
+                  e.target.style.borderBottomColor = '#0C3D4A';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderBottomColor = '#d1d5db';
+                }}
+              />
             </div>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              onKeyPress={handleKeyPress}
-              placeholder="Password"
-              style={styles.input}
-              onFocus={(e) => {
-                e.target.style.borderBottomColor = '#0C3D4A';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderBottomColor = '#d1d5db';
-              }}
-            />
           </div>
 
-          {/* Login Button */}
           <button
             onClick={handleSubmit}
             disabled={isLoading}
@@ -255,35 +226,16 @@ const LoginForm = () => {
               ...styles.button,
               ...(isLoading ? styles.buttonDisabled : {})
             }}
-            onMouseEnter={(e) => {
-              if (!isLoading) {
-                e.target.style.backgroundColor = '#0a2f3a';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isLoading) {
-                e.target.style.backgroundColor = '#0C3D4A';
-              }
-            }}
           >
             {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </div>
 
-        {/* Sign Up Link */}
         <div style={styles.signupContainer}>
           <span style={styles.signupText}>Do not have an account? </span>
           <span
             onClick={handleSignUp}
             style={styles.signupLink}
-            onMouseEnter={(e) => {
-              e.target.style.color = '#0a2f3a';
-              e.target.style.textDecoration = 'underline';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.color = '#0C3D4A';
-              e.target.style.textDecoration = 'none';
-            }}
           >
             Sign up
           </span>
