@@ -1,26 +1,53 @@
 import React, { useState } from 'react';
+import { User, Mail, Lock } from 'lucide-react';
 
 const SignUpForm = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ username: '', email: '', password: '' });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (error) setError('');
   };
 
-  const handleSubmit = () => {
-    console.log('Form submitted:', formData);
+  const handleSubmit = async () => {
+    if (!formData.username || !formData.email || !formData.password) {
+      setError('Please fill in all fields.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Signup successful:', data);
+      } else {
+        setError(data.message || 'Signup failed. Please try again.');
+      }
+    } catch (err) {
+      setError('Network error. Please check your connection.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleLogin = () => {
-    console.log('Navigate to login');
+  const handleLoginRedirect = () => {
+    window.location.href = '/login';
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') handleSubmit();
   };
 
   const styles = {
@@ -33,7 +60,7 @@ const SignUpForm = () => {
       padding: '1rem',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif'
     },
-    formCard: {
+    card: {
       maxWidth: '400px',
       width: '100%',
       backgroundColor: 'white',
@@ -57,6 +84,15 @@ const SignUpForm = () => {
       backgroundColor: '#0C3D4A',
       margin: '0 auto',
       borderRadius: '0.125rem'
+    },
+    errorMessage: {
+      marginBottom: '1.5rem',
+      padding: '0.75rem',
+      backgroundColor: '#fef2f2',
+      border: '1px solid #fecaca',
+      color: '#dc2626',
+      borderRadius: '0.375rem',
+      fontSize: '0.875rem'
     },
     formContainer: {
       display: 'flex',
@@ -96,13 +132,7 @@ const SignUpForm = () => {
       color: '#111827',
       boxSizing: 'border-box'
     },
-    inputFocused: {
-      borderBottomColor: '#0C3D4A'
-    },
-    placeholder: {
-      color: '#9ca3af'
-    },
-    submitButton: {
+    button: {
       width: '100%',
       backgroundColor: '#0C3D4A',
       color: 'white',
@@ -111,18 +141,18 @@ const SignUpForm = () => {
       border: 'none',
       borderRadius: '9999px',
       cursor: 'pointer',
-      transition: 'background-color 0.2s ease',
       fontSize: '1rem',
       marginTop: '0.5rem'
     },
-    submitButtonHover: {
-      backgroundColor: '#0a2f3a'
+    buttonDisabled: {
+      backgroundColor: '#4a9ba8',
+      cursor: 'not-allowed'
     },
-    footer: {
+    loginContainer: {
       marginTop: '2rem',
       textAlign: 'center'
     },
-    footerText: {
+    loginText: {
       color: '#6b7280'
     },
     loginLink: {
@@ -130,142 +160,88 @@ const SignUpForm = () => {
       fontWeight: '600',
       textDecoration: 'none',
       marginLeft: '0.25rem',
-      cursor: 'pointer',
-      transition: 'color 0.2s ease'
-    },
-    loginLinkHover: {
-      color: '#0a2f3a',
-      textDecoration: 'underline'
+      cursor: 'pointer'
     }
   };
 
-
-  const UserIcon = () => (
-    <svg style={styles.icon} fill="currentColor" viewBox="0 0 24 24">
-      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-    </svg>
-  );
-
-  const EmailIcon = () => (
-    <svg style={styles.icon} fill="currentColor" viewBox="0 0 24 24">
-      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-    </svg>
-  );
-
-  const LockIcon = () => (
-    <svg style={styles.icon} fill="currentColor" viewBox="0 0 24 24">
-      <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
-    </svg>
-  );
-
   return (
     <div style={styles.container}>
-      <div style={styles.formCard}>
-        {/* Header */}
+      <div style={styles.card}>
         <div style={styles.header}>
           <h1 style={styles.title}>Sign Up</h1>
           <div style={styles.underline}></div>
         </div>
-        
-        {/* Sign Up Form */}
+
+        {error && <div style={styles.errorMessage}>{error}</div>}
+
         <div style={styles.formContainer}>
-          {/* Name Field */}
           <div style={styles.inputGroup}>
             <div style={styles.inputWrapper}>
-              <UserIcon />
+              <User style={styles.icon} />
               <input
                 type="text"
-                name="name"
-                placeholder="Name"
-                value={formData.name}
+                name="username"
+                placeholder="Username"
+                value={formData.username}
                 onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
                 style={styles.input}
-                onFocus={(e) => {
-                  e.target.style.borderBottomColor = '#0C3D4A';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderBottomColor = '#d1d5db';
-                }}
-                required
+                onFocus={(e) => { e.target.style.borderBottomColor = '#0C3D4A'; }}
+                onBlur={(e) => { e.target.style.borderBottomColor = '#d1d5db'; }}
               />
             </div>
           </div>
 
-          {/* Email Field */}
           <div style={styles.inputGroup}>
             <div style={styles.inputWrapper}>
-              <EmailIcon />
+              <Mail style={styles.icon} />
               <input
                 type="email"
                 name="email"
                 placeholder="Email"
                 value={formData.email}
                 onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
                 style={styles.input}
-                onFocus={(e) => {
-                  e.target.style.borderBottomColor = '#0C3D4A';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderBottomColor = '#d1d5db';
-                }}
-                required
+                onFocus={(e) => { e.target.style.borderBottomColor = '#0C3D4A'; }}
+                onBlur={(e) => { e.target.style.borderBottomColor = '#d1d5db'; }}
               />
             </div>
           </div>
 
-          {/* Password Field */}
           <div style={styles.inputGroup}>
             <div style={styles.inputWrapper}>
-              <LockIcon />
+              <Lock style={styles.icon} />
               <input
                 type="password"
                 name="password"
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
                 style={styles.input}
-                onFocus={(e) => {
-                  e.target.style.borderBottomColor = '#0C3D4A';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderBottomColor = '#d1d5db';
-                }}
-                required
+                onFocus={(e) => { e.target.style.borderBottomColor = '#0C3D4A'; }}
+                onBlur={(e) => { e.target.style.borderBottomColor = '#d1d5db'; }}
               />
             </div>
           </div>
 
-          {/* Sign Up Button */}
           <button
             onClick={handleSubmit}
-            style={styles.submitButton}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#0a2f3a';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#0C3D4A';
+            disabled={isLoading}
+            style={{
+              ...styles.button,
+              ...(isLoading ? styles.buttonDisabled : {})
             }}
           >
-            Sign Up
+            {isLoading ? 'Signing up...' : 'Sign Up'}
           </button>
         </div>
 
-        {/* Login Link */}
-        <div style={styles.footer}>
-          <span style={styles.footerText}>Already have an account </span>
-          <span
-            onClick={handleLogin}
-            style={styles.loginLink}
-            onMouseEnter={(e) => {
-              e.target.style.color = '#0a2f3a';
-              e.target.style.textDecoration = 'underline';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.color = '#0C3D4A';
-              e.target.style.textDecoration = 'none';
-            }}
-          >
-            Log in
+        <div style={styles.loginContainer}>
+          <span style={styles.loginText}>Already have an account?</span>
+          <span onClick={handleLoginRedirect} style={styles.loginLink}>
+            Login
           </span>
         </div>
       </div>

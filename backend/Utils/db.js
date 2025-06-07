@@ -1,18 +1,15 @@
-import mysql from 'mysql'
+import mysql from 'mysql';
 
-const con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "hr-core"
-})
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'hr_core'
+});
 
-con.connect(function(err) {
-    if(err) {
-        console.log("connection error")
-    } else {
-        console.log("Connected")
-    }
-})
+db.connect((err) => {
+  if (err) throw err;
+  console.log('Connected to MySQL database ✅');
+});
 
-export default con;
+export default db;
