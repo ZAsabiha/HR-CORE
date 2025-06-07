@@ -37,7 +37,6 @@ const LoginForm = () => {
       }
     } catch (err) {
       setError('Network error. Please check your connection.');
-      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -48,9 +47,7 @@ const LoginForm = () => {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSubmit();
-    }
+    if (e.key === 'Enter') handleSubmit();
   };
 
   const styles = {
@@ -130,6 +127,7 @@ const LoginForm = () => {
       borderBottom: '2px solid #d1d5db',
       backgroundColor: 'transparent',
       outline: 'none',
+      transition: 'border-color 0.2s ease',
       fontSize: '1rem',
       color: '#111827',
       boxSizing: 'border-box'
@@ -188,12 +186,8 @@ const LoginForm = () => {
                 onChange={handleInputChange}
                 onKeyPress={handleKeyPress}
                 style={styles.input}
-                onFocus={(e) => {
-                  e.target.style.borderBottomColor = '#0C3D4A';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderBottomColor = '#d1d5db';
-                }}
+                onFocus={(e) => { e.target.style.borderBottomColor = '#0C3D4A'; }}
+                onBlur={(e) => { e.target.style.borderBottomColor = '#d1d5db'; }}
               />
             </div>
           </div>
@@ -209,12 +203,8 @@ const LoginForm = () => {
                 onChange={handleInputChange}
                 onKeyPress={handleKeyPress}
                 style={styles.input}
-                onFocus={(e) => {
-                  e.target.style.borderBottomColor = '#0C3D4A';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderBottomColor = '#d1d5db';
-                }}
+                onFocus={(e) => { e.target.style.borderBottomColor = '#0C3D4A'; }}
+                onBlur={(e) => { e.target.style.borderBottomColor = '#d1d5db'; }}
               />
             </div>
           </div>

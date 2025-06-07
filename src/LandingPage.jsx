@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { PieChart, User, Folder, Settings, Mail } from 'lucide-react';
 
 const LandingPage = () => {
@@ -44,7 +45,6 @@ const LandingPage = () => {
     },
     headingText: {
       fontSize: '3.5rem',
-      fontFamily: '"Inter", system-ui, -apple-system, sans-serif',
       fontWeight: '700',
       lineHeight: '1.2',
     },
@@ -55,7 +55,6 @@ const LandingPage = () => {
       borderTop: '1px solid rgba(255,255,255,0.2)',
       fontWeight: '400',
     },
-    // HR Core Diagram Styles
     diagramContainer: {
       width: '350px',
       height: '350px',
@@ -112,6 +111,8 @@ const LandingPage = () => {
       justifyContent: 'center',
       border: '3px solid #2c5f5f',
       position: 'absolute',
+      cursor: 'pointer',
+      transition: 'transform 0.2s ease',
     },
     connectionLine: {
       position: 'absolute',
@@ -121,13 +122,12 @@ const LandingPage = () => {
     }
   };
 
-  // Function to get icon positions around the circle
   const getIconPosition = (index, total, radius = 125) => {
-    const angle = (index * 360 / total) - 90; // Start from top
+    const angle = (index * 360 / total) - 90;
     const radian = (angle * Math.PI) / 180;
     const x = Math.cos(radian) * radius;
     const y = Math.sin(radian) * radius;
-    
+
     return {
       left: '50%',
       top: '50%',
@@ -135,7 +135,6 @@ const LandingPage = () => {
     };
   };
 
-  // Function to get connection line styles
   const getConnectionLineStyle = (index, total) => {
     const angle = (index * 360 / total) - 90;
     return {
@@ -149,7 +148,7 @@ const LandingPage = () => {
 
   const icons = [
     { component: PieChart, color: '#87ceeb', bgColor: '#4a90e2' },
-    { component: User, color: '#ffb6c1', bgColor: '#e74c3c' },
+    { component: User, color: '#ffb6c1', bgColor: '#e74c3c', route: '/login' },
     { component: Folder, color: '#ffd700', bgColor: '#f39c12' },
     { component: Settings, color: '#ffd700', bgColor: '#f39c12' },
     { component: Mail, color: '#87ceeb', bgColor: '#4a90e2' }
@@ -157,6 +156,7 @@ const LandingPage = () => {
 
   const handleLinkHover = (e, isHover) => {
     e.target.style.color = isHover ? '#ffd700' : 'white';
+    e.target.style.textDecoration = isHover ? 'underline' : 'none';
   };
 
   return (
@@ -165,34 +165,10 @@ const LandingPage = () => {
       <nav style={styles.nav}>
         <div style={styles.navLeft}>HR CORE</div>
         <div style={styles.navRight}>
-          <span 
-            style={styles.link}
-            onMouseEnter={(e) => handleLinkHover(e, true)}
-            onMouseLeave={(e) => handleLinkHover(e, false)}
-          >
-            Home
-          </span>
-          <span 
-            style={styles.link}
-            onMouseEnter={(e) => handleLinkHover(e, true)}
-            onMouseLeave={(e) => handleLinkHover(e, false)}
-          >
-            About
-          </span>
-          <span 
-            style={styles.link}
-            onMouseEnter={(e) => handleLinkHover(e, true)}
-            onMouseLeave={(e) => handleLinkHover(e, false)}
-          >
-            Contacts
-          </span>
-          <span 
-            style={styles.link}
-            onMouseEnter={(e) => handleLinkHover(e, true)}
-            onMouseLeave={(e) => handleLinkHover(e, false)}
-          >
-            Login
-          </span>
+          <Link to="/" style={styles.link} onMouseEnter={(e) => handleLinkHover(e, true)} onMouseLeave={(e) => handleLinkHover(e, false)}>Home</Link>
+          <Link to="/about" style={styles.link} onMouseEnter={(e) => handleLinkHover(e, true)} onMouseLeave={(e) => handleLinkHover(e, false)}>About</Link>
+          <Link to="/contact" style={styles.link} onMouseEnter={(e) => handleLinkHover(e, true)} onMouseLeave={(e) => handleLinkHover(e, false)}>Contact</Link>
+          <Link to="/login" style={styles.link} onMouseEnter={(e) => handleLinkHover(e, true)} onMouseLeave={(e) => handleLinkHover(e, false)}>Login</Link>
         </div>
       </nav>
 
@@ -202,15 +178,13 @@ const LandingPage = () => {
           <div>Welcome</div>
           <div>to HR Core</div>
         </div>
-        
+
         {/* HR Core Diagram */}
         <div style={styles.diagramContainer}>
-          {/* Connection lines */}
           {icons.map((_, index) => (
             <div key={`line-${index}`} style={getConnectionLineStyle(index, icons.length)} />
           ))}
 
-          {/* Outer circle guide (invisible) */}
           <div style={{
             position: 'absolute',
             width: '280px',
@@ -222,37 +196,37 @@ const LandingPage = () => {
             transform: 'translate(-50%, -50%)'
           }} />
 
-          {/* Central business person */}
           <div style={styles.centralPerson}>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <div style={styles.personIcon}>
-                {/* Person head */}
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={styles.personIcon}></div>
               <div style={styles.personBody}>
                 <div style={styles.personTie} />
               </div>
             </div>
           </div>
 
-          {/* Surrounding icons */}
           {icons.map((iconData, index) => {
             const IconComponent = iconData.component;
-            return (
+            const iconPosition = getIconPosition(index, icons.length);
+            const iconContent = (
               <div
                 key={index}
                 style={{
                   ...styles.iconCircle,
-                  ...getIconPosition(index, icons.length),
+                  ...iconPosition,
                   backgroundColor: iconData.bgColor
                 }}
               >
                 <IconComponent size={28} color="white" />
               </div>
+            );
+
+            return iconData.route ? (
+              <Link key={index} to={iconData.route} style={{ textDecoration: 'none' }}>
+                {iconContent}
+              </Link>
+            ) : (
+              iconContent
             );
           })}
         </div>
