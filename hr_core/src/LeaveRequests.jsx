@@ -86,7 +86,7 @@ const LeaveRequestsPage = () => {
       flex: 1,
       backgroundColor: '#f9fafb',
       minHeight: '100vh',
-      marginLeft: '220px' // Account for fixed sidebar width
+      marginLeft: '280px' // Account for wider fixed sidebar width
     },
     navbar: {
       backgroundColor: '#0C3D4A',
@@ -339,19 +339,27 @@ const LeaveRequestsPage = () => {
       backgroundColor: '#fef3c7',
       color: '#92400e'
     },
-    actionButtons: {
+    // Improved action buttons with consistent sizing
+    actionButtonsContainer: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '0.25rem'
+      gap: '0.375rem',
+      minWidth: '120px'
     },
     actionButton: {
-      padding: '0.25rem 0.75rem',
+      padding: '0.375rem 0.75rem',
       borderRadius: '0.25rem',
       fontSize: '0.75rem',
       fontWeight: '500',
       border: 'none',
       cursor: 'pointer',
-      transition: 'background-color 0.2s'
+      transition: 'all 0.2s',
+      textAlign: 'center',
+      minHeight: '28px',
+      width: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
     },
     approveButton: {
       backgroundColor: '#059669',
@@ -366,7 +374,8 @@ const LeaveRequestsPage = () => {
       color: 'white'
     },
     actionsDropdown: {
-      position: 'relative'
+      position: 'relative',
+      minWidth: '120px'
     },
     actionsButton: {
       backgroundColor: '#0C3D4A',
@@ -379,8 +388,19 @@ const LeaveRequestsPage = () => {
       cursor: 'pointer',
       display: 'flex',
       alignItems: 'center',
+      justifyContent: 'center',
       gap: '0.25rem',
-      transition: 'background-color 0.2s'
+      transition: 'background-color 0.2s',
+      width: '100%',
+      minHeight: '32px'
+    },
+    // Actions column specific styling
+    actionsCell: {
+      padding: '1rem 1.5rem',
+      whiteSpace: 'nowrap',
+      fontSize: '0.875rem',
+      color: '#111827',
+      width: '140px'
     }
   };
 
@@ -402,7 +422,7 @@ const LeaveRequestsPage = () => {
     
     if (status === 'Pending') {
       return (
-        <div style={styles.actionButtons}>
+        <div style={styles.actionButtonsContainer}>
           <button 
             onClick={() => handleAction('approve', requestId)}
             style={{...styles.actionButton, ...styles.approveButton}}
@@ -433,14 +453,16 @@ const LeaveRequestsPage = () => {
 
     if (status === 'Approved' || status === 'Declined') {
       return (
-        <button 
-          onClick={() => handleAction('details', requestId)}
-          style={{...styles.actionButton, ...styles.detailsButton}}
-          onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(12, 61, 74, 0.8)'}
-          onMouseLeave={(e) => e.target.style.backgroundColor = '#0C3D4A'}
-        >
-          View Details
-        </button>
+        <div style={styles.actionButtonsContainer}>
+          <button 
+            onClick={() => handleAction('details', requestId)}
+            style={{...styles.actionButton, ...styles.detailsButton}}
+            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(12, 61, 74, 0.8)'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#0C3D4A'}
+          >
+            View Details
+          </button>
+        </div>
       );
     }
 
@@ -507,38 +529,34 @@ const LeaveRequestsPage = () => {
         <nav style={styles.navbar}>
           <div style={styles.navContent}>
             <div style={styles.navLinks}>
-              <a 
-                href="#" 
-                style={styles.navLink}
+              <button 
+                style={{...styles.navLink, background: 'none', border: 'none'}}
                 onMouseEnter={(e) => e.target.style.color = '#fbbf24'}
                 onMouseLeave={(e) => e.target.style.color = 'white'}
               >
                 Home
-              </a>
-              <a 
-                href="#" 
-                style={styles.navLink}
+              </button>
+              <button 
+                style={{...styles.navLink, background: 'none', border: 'none'}}
                 onMouseEnter={(e) => e.target.style.color = '#fbbf24'}
                 onMouseLeave={(e) => e.target.style.color = 'white'}
               >
                 About
-              </a>
-              <a 
-                href="#" 
-                style={styles.navLink}
+              </button>
+              <button 
+                style={{...styles.navLink, background: 'none', border: 'none'}}
                 onMouseEnter={(e) => e.target.style.color = '#fbbf24'}
                 onMouseLeave={(e) => e.target.style.color = 'white'}
               >
                 Contacts
-              </a>
-              <a 
-                href="#" 
-                style={styles.navLink}
+              </button>
+              <button 
+                style={{...styles.navLink, background: 'none', border: 'none'}}
                 onMouseEnter={(e) => e.target.style.color = '#fbbf24'}
                 onMouseLeave={(e) => e.target.style.color = 'white'}
               >
                 Login
-              </a>
+              </button>
             </div>
           </div>
         </nav>
@@ -723,7 +741,7 @@ const LeaveRequestsPage = () => {
                     <th style={styles.tableHeaderCell}>End Date</th>
                     <th style={styles.tableHeaderCell}>Type</th>
                     <th style={styles.tableHeaderCell}>Status</th>
-                    <th style={styles.tableHeaderCell}>Actions</th>
+                    <th style={{...styles.tableHeaderCell, width: '140px'}}>Actions</th>
                   </tr>
                 </thead>
                 <tbody style={styles.tableBody}>
@@ -744,7 +762,7 @@ const LeaveRequestsPage = () => {
                           {request.status}
                         </span>
                       </td>
-                      <td style={styles.tableCell}>
+                      <td style={styles.actionsCell}>
                         <ActionButton 
                           status={request.status}
                           requestId={request.id}
