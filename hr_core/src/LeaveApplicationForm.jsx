@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, FileText } from 'lucide-react';
 
+
 const LeaveApplicationForm = () => {
   const [formData, setFormData] = useState({
     leaveType: 'Annual Leave',

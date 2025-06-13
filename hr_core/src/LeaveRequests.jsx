@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Filter, ChevronDown, Menu } from 'lucide-react';
+import Sidebar from './Components/Sidebar';          
+import './Components/Sidebar.css';
 
 const LeaveRequestsPage = () => {
   const [activeTab, setActiveTab] = useState('requests');
@@ -7,7 +9,6 @@ const LeaveRequestsPage = () => {
   const [selectedFilter, setSelectedFilter] = useState('All Requests');
   const [openDropdown, setOpenDropdown] = useState(null);
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
-
 
   const leaveRequests = [
     {
@@ -76,10 +77,16 @@ const LeaveRequestsPage = () => {
   ];
 
   const styles = {
+    // Main container now uses flex to accommodate sidebar
+    appContainer: {
+      display: 'flex',
+      minHeight: '100vh'
+    },
     container: {
       flex: 1,
       backgroundColor: '#f9fafb',
-      minHeight: '100vh'
+      minHeight: '100vh',
+      marginLeft: '220px' // Account for fixed sidebar width
     },
     navbar: {
       backgroundColor: '#0C3D4A',
@@ -484,259 +491,270 @@ const LeaveRequestsPage = () => {
     console.log(`${action} action for request ${requestId}`);
   };
 
+  const handleLogout = () => {
+    alert('Logging out...');
+    // Add your logout logic here
+  };
+
   return (
-    <div style={styles.container}>
-      {/* Navigation Bar */}
-      <nav style={styles.navbar}>
-        <div style={styles.navContent}>
-          <div style={styles.navLinks}>
-            <a 
-              href="#" 
-              style={styles.navLink}
-              onMouseEnter={(e) => e.target.style.color = '#fbbf24'}
-              onMouseLeave={(e) => e.target.style.color = 'white'}
-            >
-              Home
-            </a>
-            <a 
-              href="#" 
-              style={styles.navLink}
-              onMouseEnter={(e) => e.target.style.color = '#fbbf24'}
-              onMouseLeave={(e) => e.target.style.color = 'white'}
-            >
-              About
-            </a>
-            <a 
-              href="#" 
-              style={styles.navLink}
-              onMouseEnter={(e) => e.target.style.color = '#fbbf24'}
-              onMouseLeave={(e) => e.target.style.color = 'white'}
-            >
-              Contacts
-            </a>
-            <a 
-              href="#" 
-              style={styles.navLink}
-              onMouseEnter={(e) => e.target.style.color = '#fbbf24'}
-              onMouseLeave={(e) => e.target.style.color = 'white'}
-            >
-              Login
-            </a>
-          </div>
-        </div>
-      </nav>
-
-      {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.headerContent}>
-          <div style={styles.headerLeft}>
-          </div>
-        </div>
-      </div>
-
+    <div style={styles.appContainer}>
+      {/* Sidebar */}
+      <Sidebar onLogout={handleLogout} />
+      
       {/* Main Content */}
-      <div style={styles.mainContent}>
-        {/* Leave Management Header */}
-        <div style={styles.pageHeader}>
-          <div style={styles.blackSquare}></div>
-          <h1 style={styles.pageTitle}>Leave Management</h1>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div style={styles.tabs}>
-          <button
-            onClick={() => setActiveTab('requests')}
-            style={{
-              ...styles.tab,
-              ...(activeTab === 'requests' ? styles.activeTab : styles.inactiveTab)
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== 'requests') {
-                e.target.style.backgroundColor = 'rgba(12, 61, 74, 0.8)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== 'requests') {
-                e.target.style.backgroundColor = '#0C3D4A';
-              }
-            }}
-          >
-            Leave Requests
-          </button>
-          <button
-            onClick={() => setActiveTab('history')}
-            style={{
-              ...styles.tab,
-              ...(activeTab === 'history' ? styles.activeTab : styles.inactiveTab)
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== 'history') {
-                e.target.style.backgroundColor = 'rgba(12, 61, 74, 0.8)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== 'history') {
-                e.target.style.backgroundColor = '#0C3D4A';
-              }
-            }}
-          >
-            Leave History
-          </button>
-        </div>
-
-        {/* Content Area */}
-        <div style={styles.contentArea}>
-          {/* Table Header */}
-          <div style={styles.tableHeader}>
-            <div style={styles.tableHeaderLeft}>
-              <h2 style={styles.tableTitle}>Leave Requests</h2>
-            </div>
-            <div style={styles.tableHeaderRight}>
-              <div style={styles.searchContainer}>
-                <Search style={styles.searchIcon} />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={styles.searchInput}
-                  onFocus={(e) => {
-                    e.target.style.outline = '2px solid #0C3D4A';
-                    e.target.style.borderColor = 'transparent';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.outline = 'none';
-                    e.target.style.borderColor = '#d1d5db';
-                  }}
-                />
-              </div>
-              <div style={{ position: 'relative' }}>
-                <button 
-                  onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
-                  style={styles.filterButton}
-                  onMouseEnter={(e) => e.target.style.color = '#6b7280'}
-                  onMouseLeave={(e) => e.target.style.color = '#9ca3af'}
-                >
-                  <Filter style={{ width: '1.25rem', height: '1.25rem' }} />
-                </button>
-                {filterDropdownOpen && (
-                  <div style={styles.dropdown}>
-                    <button 
-                      onClick={() => {
-                        setSelectedFilter('All Requests');
-                        setFilterDropdownOpen(false);
-                      }}
-                      style={styles.dropdownItem}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = '#0C3D4A';
-                        e.target.style.color = 'white';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = 'transparent';
-                        e.target.style.color = '#0C3D4A';
-                      }}
-                    >
-                      All Requests
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setSelectedFilter('Pending');
-                        setFilterDropdownOpen(false);
-                      }}
-                      style={styles.dropdownItem}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = '#0C3D4A';
-                        e.target.style.color = 'white';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = 'transparent';
-                        e.target.style.color = '#0C3D4A';
-                      }}
-                    >
-                      Pending
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setSelectedFilter('Approved');
-                        setFilterDropdownOpen(false);
-                      }}
-                      style={styles.dropdownItem}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = '#0C3D4A';
-                        e.target.style.color = 'white';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = 'transparent';
-                        e.target.style.color = '#0C3D4A';
-                      }}
-                    >
-                      Approved
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setSelectedFilter('Declined');
-                        setFilterDropdownOpen(false);
-                      }}
-                      style={styles.dropdownItem}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = '#0C3D4A';
-                        e.target.style.color = 'white';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = 'transparent';
-                        e.target.style.color = '#0C3D4A';
-                      }}
-                    >
-                      Declined
-                    </button>
-                  </div>
-                )}
-              </div>
+      <div style={styles.container}>
+        {/* Navigation Bar */}
+        <nav style={styles.navbar}>
+          <div style={styles.navContent}>
+            <div style={styles.navLinks}>
+              <a 
+                href="#" 
+                style={styles.navLink}
+                onMouseEnter={(e) => e.target.style.color = '#fbbf24'}
+                onMouseLeave={(e) => e.target.style.color = 'white'}
+              >
+                Home
+              </a>
+              <a 
+                href="#" 
+                style={styles.navLink}
+                onMouseEnter={(e) => e.target.style.color = '#fbbf24'}
+                onMouseLeave={(e) => e.target.style.color = 'white'}
+              >
+                About
+              </a>
+              <a 
+                href="#" 
+                style={styles.navLink}
+                onMouseEnter={(e) => e.target.style.color = '#fbbf24'}
+                onMouseLeave={(e) => e.target.style.color = 'white'}
+              >
+                Contacts
+              </a>
+              <a 
+                href="#" 
+                style={styles.navLink}
+                onMouseEnter={(e) => e.target.style.color = '#fbbf24'}
+                onMouseLeave={(e) => e.target.style.color = 'white'}
+              >
+                Login
+              </a>
             </div>
           </div>
+        </nav>
 
-          {/* Table */}
-          <div style={styles.table}>
-            <table style={styles.tableElement}>
-              <thead style={styles.tableHead}>
-                <tr>
-                  <th style={styles.tableHeaderCell}>Name(s)</th>
-                  <th style={styles.tableHeaderCell}>Duration(s)</th>
-                  <th style={styles.tableHeaderCell}>Start Date</th>
-                  <th style={styles.tableHeaderCell}>End Date</th>
-                  <th style={styles.tableHeaderCell}>Type</th>
-                  <th style={styles.tableHeaderCell}>Status</th>
-                  <th style={styles.tableHeaderCell}>Actions</th>
-                </tr>
-              </thead>
-              <tbody style={styles.tableBody}>
-                {filteredRequests.map((request) => (
-                  <tr 
-                    key={request.id} 
-                    style={styles.tableRow}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+        {/* Header */}
+        <div style={styles.header}>
+          <div style={styles.headerContent}>
+            <div style={styles.headerLeft}>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div style={styles.mainContent}>
+          {/* Leave Management Header */}
+          <div style={styles.pageHeader}>
+            <div style={styles.blackSquare}></div>
+            <h1 style={styles.pageTitle}>Leave Management</h1>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div style={styles.tabs}>
+            <button
+              onClick={() => setActiveTab('requests')}
+              style={{
+                ...styles.tab,
+                ...(activeTab === 'requests' ? styles.activeTab : styles.inactiveTab)
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'requests') {
+                  e.target.style.backgroundColor = 'rgba(12, 61, 74, 0.8)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'requests') {
+                  e.target.style.backgroundColor = '#0C3D4A';
+                }
+              }}
+            >
+              Leave Requests
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              style={{
+                ...styles.tab,
+                ...(activeTab === 'history' ? styles.activeTab : styles.inactiveTab)
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'history') {
+                  e.target.style.backgroundColor = 'rgba(12, 61, 74, 0.8)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'history') {
+                  e.target.style.backgroundColor = '#0C3D4A';
+                }
+              }}
+            >
+              Leave History
+            </button>
+          </div>
+
+          {/* Content Area */}
+          <div style={styles.contentArea}>
+            {/* Table Header */}
+            <div style={styles.tableHeader}>
+              <div style={styles.tableHeaderLeft}>
+                <h2 style={styles.tableTitle}>Leave Requests</h2>
+              </div>
+              <div style={styles.tableHeaderRight}>
+                <div style={styles.searchContainer}>
+                  <Search style={styles.searchIcon} />
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={styles.searchInput}
+                    onFocus={(e) => {
+                      e.target.style.outline = '2px solid #0C3D4A';
+                      e.target.style.borderColor = 'transparent';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.outline = 'none';
+                      e.target.style.borderColor = '#d1d5db';
+                    }}
+                  />
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <button 
+                    onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+                    style={styles.filterButton}
+                    onMouseEnter={(e) => e.target.style.color = '#6b7280'}
+                    onMouseLeave={(e) => e.target.style.color = '#9ca3af'}
                   >
-                    <td style={styles.tableCell}>{request.name}</td>
-                    <td style={styles.tableCell}>{request.duration}</td>
-                    <td style={styles.tableCell}>{request.startDate}</td>
-                    <td style={styles.tableCell}>{request.endDate}</td>
-                    <td style={styles.tableCell}>{request.type}</td>
-                    <td style={styles.tableCell}>
-                      <span style={{...styles.statusBadge, ...getStatusColor(request.status)}}>
-                        {request.status}
-                      </span>
-                    </td>
-                    <td style={styles.tableCell}>
-                      <ActionButton 
-                        status={request.status}
-                        requestId={request.id}
-                      />
-                    </td>
+                    <Filter style={{ width: '1.25rem', height: '1.25rem' }} />
+                  </button>
+                  {filterDropdownOpen && (
+                    <div style={styles.dropdown}>
+                      <button 
+                        onClick={() => {
+                          setSelectedFilter('All Requests');
+                          setFilterDropdownOpen(false);
+                        }}
+                        style={styles.dropdownItem}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = '#0C3D4A';
+                          e.target.style.color = 'white';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'transparent';
+                          e.target.style.color = '#0C3D4A';
+                        }}
+                      >
+                        All Requests
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setSelectedFilter('Pending');
+                          setFilterDropdownOpen(false);
+                        }}
+                        style={styles.dropdownItem}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = '#0C3D4A';
+                          e.target.style.color = 'white';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'transparent';
+                          e.target.style.color = '#0C3D4A';
+                        }}
+                      >
+                        Pending
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setSelectedFilter('Approved');
+                          setFilterDropdownOpen(false);
+                        }}
+                        style={styles.dropdownItem}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = '#0C3D4A';
+                          e.target.style.color = 'white';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'transparent';
+                          e.target.style.color = '#0C3D4A';
+                        }}
+                      >
+                        Approved
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setSelectedFilter('Declined');
+                          setFilterDropdownOpen(false);
+                        }}
+                        style={styles.dropdownItem}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = '#0C3D4A';
+                          e.target.style.color = 'white';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'transparent';
+                          e.target.style.color = '#0C3D4A';
+                        }}
+                      >
+                        Declined
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Table */}
+            <div style={styles.table}>
+              <table style={styles.tableElement}>
+                <thead style={styles.tableHead}>
+                  <tr>
+                    <th style={styles.tableHeaderCell}>Name(s)</th>
+                    <th style={styles.tableHeaderCell}>Duration(s)</th>
+                    <th style={styles.tableHeaderCell}>Start Date</th>
+                    <th style={styles.tableHeaderCell}>End Date</th>
+                    <th style={styles.tableHeaderCell}>Type</th>
+                    <th style={styles.tableHeaderCell}>Status</th>
+                    <th style={styles.tableHeaderCell}>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody style={styles.tableBody}>
+                  {filteredRequests.map((request) => (
+                    <tr 
+                      key={request.id} 
+                      style={styles.tableRow}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                    >
+                      <td style={styles.tableCell}>{request.name}</td>
+                      <td style={styles.tableCell}>{request.duration}</td>
+                      <td style={styles.tableCell}>{request.startDate}</td>
+                      <td style={styles.tableCell}>{request.endDate}</td>
+                      <td style={styles.tableCell}>{request.type}</td>
+                      <td style={styles.tableCell}>
+                        <span style={{...styles.statusBadge, ...getStatusColor(request.status)}}>
+                          {request.status}
+                        </span>
+                      </td>
+                      <td style={styles.tableCell}>
+                        <ActionButton 
+                          status={request.status}
+                          requestId={request.id}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

@@ -1,0 +1,100 @@
+/* Sidebar.css */
+
+.sidebar {
+  width: 220px;
+  background-color: #0C3D4A;
+  color: white;
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+.sidebar-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-align: center;
+  color: white;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+
+.sidebar-menu li {
+  padding: 12px 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s ease;
+  border-radius: 4px;
+  color: white;
+  text-decoration: none;
+}
+
+.sidebar-menu li:hover {
+  background-color: #10515f;
+}
+
+.sidebar-menu li i {
+  margin-right: 10px;
+  font-size: 18px;
+  width: 20px;
+  text-align: center;
+}
+
+.sidebar-menu li span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sidebar-menu li a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.sidebar-menu li a:hover {
+  color: white;
+  text-decoration: none;
+}
+
+.logout-btn {
+  margin-top: auto;
+  background-color: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.logout-btn:hover {
+  background-color: #ff6666 !important;
+  color: white;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;
+  }
+  
+  .sidebar-title {
+    font-size: 20px;
+  }
+  
+  .sidebar-menu li span {
+    font-size: 13px;
+  }
+}
