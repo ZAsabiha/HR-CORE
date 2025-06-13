@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Filter, ChevronDown, Menu } from 'lucide-react';
 import Sidebar from './Components/Sidebar';          
 import './Components/Sidebar.css';
+import './LeaveRequests.css';
 
 const LeaveRequestsPage = () => {
   const [activeTab, setActiveTab] = useState('requests');
@@ -312,9 +313,6 @@ const LeaveRequestsPage = () => {
       borderBottom: '1px solid #e5e7eb',
       transition: 'background-color 0.2s'
     },
-    tableRowHover: {
-      backgroundColor: '#f9fafb'
-    },
     tableCell: {
       padding: '1rem 1.5rem',
       whiteSpace: 'nowrap',
@@ -426,24 +424,21 @@ const LeaveRequestsPage = () => {
           <button 
             onClick={() => handleAction('approve', requestId)}
             style={{...styles.actionButton, ...styles.approveButton}}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#047857'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#059669'}
+            className="action-button approve-button"
           >
             Approve
           </button>
           <button 
             onClick={() => handleAction('decline', requestId)}
             style={{...styles.actionButton, ...styles.declineButton}}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#b91c1c'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#dc2626'}
+            className="action-button decline-button"
           >
             Decline
           </button>
           <button 
             onClick={() => handleAction('details', requestId)}
             style={{...styles.actionButton, ...styles.detailsButton}}
-            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(12, 61, 74, 0.8)'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#0C3D4A'}
+            className="action-button details-button"
           >
             View Details
           </button>
@@ -457,8 +452,7 @@ const LeaveRequestsPage = () => {
           <button 
             onClick={() => handleAction('details', requestId)}
             style={{...styles.actionButton, ...styles.detailsButton}}
-            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(12, 61, 74, 0.8)'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#0C3D4A'}
+            className="action-button details-button"
           >
             View Details
           </button>
@@ -471,8 +465,7 @@ const LeaveRequestsPage = () => {
         <button 
           onClick={() => setOpenDropdown(isOpen ? null : requestId)}
           style={styles.actionsButton}
-          onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(12, 61, 74, 0.8)'}
-          onMouseLeave={(e) => e.target.style.backgroundColor = '#0C3D4A'}
+          className="action-button actions-dropdown-button"
         >
           Actions
           <ChevronDown style={{ width: '1rem', height: '1rem' }} />
@@ -749,8 +742,7 @@ const LeaveRequestsPage = () => {
                     <tr 
                       key={request.id} 
                       style={styles.tableRow}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                      className="table-row"
                     >
                       <td style={styles.tableCell}>{request.name}</td>
                       <td style={styles.tableCell}>{request.duration}</td>
