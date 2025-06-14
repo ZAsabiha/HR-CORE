@@ -18,6 +18,6 @@ app.use(cookieParser());
 app.use('/auth', adminRouter);
 app.use('/employee', EmployeeRouter);
 
-app.listen(8080, () => {
-  console.log('Server is running on port 8080');
+app.listen(5000, () => {
+  console.log('Server is running on port 5000');
 });
