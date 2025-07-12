@@ -1,10 +1,9 @@
-import React from 'react';
-import LeaveRequestsPage from './LeaveRequests';
+import RecruitmentDashboard from './RecruitmentDashboard';
 
 function App() {
   return (
-    <div className="App">
-      <LeaveRequestsPage />
+    <div>
+      <RecruitmentDashboard />
     </div>
   );
 }
