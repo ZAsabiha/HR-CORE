@@ -2,12 +2,25 @@ import React, { useState } from 'react';
 import Sidebar from './Components/Sidebar';
 import './RecruitmentDashboard.css';
 
+// Import Modal Components
+import ViewCandidateModal from './Components/modals/ViewCandidateModal';
+import EditCandidateModal from './Components/modals/EditCandidateModal';
+import ContactCandidateModal from './Components/modals/ContactCandidateModal';
+import ScheduleInterviewModal from './Components/modals/ScheduleInterviewModal';
+
 const RecruitmentDashboard = () => {
   const [activeTab, setActiveTab] = useState('candidates');
   const [statusFilter, setStatusFilter] = useState('all');
   const [jobFilter, setJobFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
+
+  // Modal states
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
 
   const stats = [
     { id: 1, title: 'Total Candidates', value: '247', change: '+12%', icon: '👥', color: 'blue' },
@@ -16,7 +29,8 @@ const RecruitmentDashboard = () => {
     { id: 4, title: 'Avg. Time to Hire', value: '12 days', change: '-2 days', icon: '⏰', color: 'orange' }
   ];
 
-  const candidates = [
+  // Changed to useState so we can update candidates
+  const [candidates, setCandidates] = useState([
     {
       id: 1,
       name: 'Raisa Raihan',
@@ -28,7 +42,7 @@ const RecruitmentDashboard = () => {
       appliedDate: '15/07/2024',
       source: 'LinkedIn',
       rating: 4.5,
-      skills: ['React', 'Node.js', 'Python']
+      skills: ['React', 'Node.js', 'Python', 'AWS', 'MongoDB']
     },
     {
       id: 2,
@@ -41,7 +55,7 @@ const RecruitmentDashboard = () => {
       appliedDate: '14/07/2024',
       source: 'Indeed',
       rating: 4.2,
-      skills: ['Product Strategy', 'Analytics', 'Leadership']
+      skills: ['Product Strategy', 'Analytics', 'Leadership', 'Agile']
     },
     {
       id: 3,
@@ -54,7 +68,7 @@ const RecruitmentDashboard = () => {
       appliedDate: '13/07/2024',
       source: 'Website',
       rating: 4.8,
-      skills: ['Figma', 'User Research', 'Prototyping']
+      skills: ['Figma', 'User Research', 'Prototyping', 'Adobe Creative Suite']
     },
     {
       id: 4,
@@ -67,7 +81,7 @@ const RecruitmentDashboard = () => {
       appliedDate: '12/07/2024',
       source: 'Referral',
       rating: 4.6,
-      skills: ['Python', 'Machine Learning', 'SQL']
+      skills: ['Python', 'Machine Learning', 'SQL', 'TensorFlow', 'R']
     },
     {
       id: 5,
@@ -80,7 +94,7 @@ const RecruitmentDashboard = () => {
       appliedDate: '11/07/2024',
       source: 'LinkedIn',
       rating: 4.3,
-      skills: ['AWS', 'Docker', 'Kubernetes']
+      skills: ['AWS', 'Docker', 'Kubernetes', 'Jenkins', 'Terraform']
     },
     {
       id: 6,
@@ -93,9 +107,9 @@ const RecruitmentDashboard = () => {
       appliedDate: '10/07/2024',
       source: 'Indeed',
       rating: 4.1,
-      skills: ['Vue.js', 'CSS', 'JavaScript']
+      skills: ['Vue.js', 'CSS', 'JavaScript', 'TypeScript', 'Sass']
     }
-  ];
+  ]);
 
   const jobPostings = [
     { id: 1, title: 'Senior Software Engineer', department: 'Engineering', applicants: 45, status: 'Active', location: 'Remote', postedDate: '01/07/2024' },
@@ -104,6 +118,48 @@ const RecruitmentDashboard = () => {
     { id: 4, title: 'Data Scientist', department: 'Analytics', applicants: 19, status: 'Active', location: 'Remote', postedDate: '22/06/2024' },
     { id: 5, title: 'DevOps Engineer', department: 'Engineering', applicants: 15, status: 'Active', location: 'Austin', postedDate: '20/06/2024' }
   ];
+
+  // Modal action handlers
+  const handleViewCandidate = (candidate) => {
+    setSelectedCandidate(candidate);
+    setViewModalOpen(true);
+  };
+
+  const handleEditCandidate = (candidate) => {
+    setSelectedCandidate(candidate);
+    setEditModalOpen(true);
+  };
+
+  const handleContactCandidate = (candidate) => {
+    setSelectedCandidate(candidate);
+    setContactModalOpen(true);
+  };
+
+  const handleScheduleInterview = (candidate) => {
+    setSelectedCandidate(candidate);
+    setScheduleModalOpen(true);
+  };
+
+  // Save candidate changes
+  const handleSaveCandidate = (updatedCandidate) => {
+    setCandidates(prev => 
+      prev.map(candidate => 
+        candidate.id === updatedCandidate.id ? updatedCandidate : candidate
+      )
+    );
+  };
+
+  // Handle interview scheduling
+  const handleScheduleInterviewSave = (interviewData) => {
+    // Here you would typically save the interview to your backend
+    console.log('Interview scheduled:', interviewData);
+    
+    // Update candidate status to Interview if not already
+    if (selectedCandidate && selectedCandidate.status === 'New' || selectedCandidate.status === 'Screening') {
+      const updatedCandidate = { ...selectedCandidate, status: 'Interview' };
+      handleSaveCandidate(updatedCandidate);
+    }
+  };
 
   const getStatusClass = (status) => {
     const statusClasses = {
@@ -327,10 +383,30 @@ const RecruitmentDashboard = () => {
                   </div>
 
                   <div className="candidate-actions">
-                    <button className="action-btn btn-view">👁️ View</button>
-                    <button className="action-btn btn-edit">✏️ Edit</button>
-                    <button className="action-btn btn-contact">💬 Contact</button>
-                    <button className="action-btn btn-schedule">📅 Schedule</button>
+                    <button 
+                      className="action-btn btn-view"
+                      onClick={() => handleViewCandidate(candidate)}
+                    >
+                      👁️ View
+                    </button>
+                    <button 
+                      className="action-btn btn-edit"
+                      onClick={() => handleEditCandidate(candidate)}
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button 
+                      className="action-btn btn-contact"
+                      onClick={() => handleContactCandidate(candidate)}
+                    >
+                      💬 Contact
+                    </button>
+                    <button 
+                      className="action-btn btn-schedule"
+                      onClick={() => handleScheduleInterview(candidate)}
+                    >
+                      📅 Schedule
+                    </button>
                   </div>
                 </div>
               ))}
@@ -382,6 +458,33 @@ const RecruitmentDashboard = () => {
           )}
         </div>
       </div>
+
+      {/* Modal Components */}
+      <ViewCandidateModal
+        candidate={selectedCandidate}
+        isOpen={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+      />
+      
+      <EditCandidateModal
+        candidate={selectedCandidate}
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onSave={handleSaveCandidate}
+      />
+      
+      <ContactCandidateModal
+        candidate={selectedCandidate}
+        isOpen={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+      />
+      
+      <ScheduleInterviewModal
+        candidate={selectedCandidate}
+        isOpen={scheduleModalOpen}
+        onClose={() => setScheduleModalOpen(false)}
+        onSchedule={handleScheduleInterviewSave}
+      />
     </div>
   );
 };
