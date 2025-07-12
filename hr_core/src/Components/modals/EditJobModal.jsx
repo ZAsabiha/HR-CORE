@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Modal from '../common/Modal'; // Adjust path as needed
-
+import Modal from '../common/Modal'; 
 const EditJobModal = ({ job, isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     title: '',
