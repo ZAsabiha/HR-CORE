@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Modal from '../common/Modal'; // Adjust path as needed
+import Modal from '../common/Modal'; 
 
 const ContactCandidateModal = ({ candidate, isOpen, onClose }) => {
   const [emailData, setEmailData] = useState({
