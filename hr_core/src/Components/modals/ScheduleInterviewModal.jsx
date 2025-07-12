@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Modal from '../common/Modal'; 
+import Modal from '../common/Modal'; // Adjust path as needed
 
 const ScheduleInterviewModal = ({ candidate, isOpen, onClose, onSchedule }) => {
   const [interviewData, setInterviewData] = useState({
