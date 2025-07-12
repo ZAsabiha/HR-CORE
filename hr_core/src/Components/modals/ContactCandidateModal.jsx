@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Modal from '../common/Modal'; 
+import Modal from '../common/Modal'; // Adjust path as needed
 
 const ContactCandidateModal = ({ candidate, isOpen, onClose }) => {
   const [emailData, setEmailData] = useState({
@@ -354,19 +354,6 @@ HR Team`
           }}
         >
           Cancel
-        </button>
-        <button
-          style={{
-            padding: '12px 24px',
-            background: '#f59e0b',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontWeight: '600'
-          }}
-        >
-          📎 Attach Files
         </button>
         <button
           onClick={sendEmail}

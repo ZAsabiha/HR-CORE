@@ -1,5 +1,5 @@
 import React from 'react';
-import Modal from '../common/Modal'; 
+import Modal from '../common/Modal'; // Adjust path as needed
 
 const ViewCandidateModal = ({ candidate, isOpen, onClose }) => {
   if (!candidate) return null;
@@ -139,38 +139,6 @@ const ViewCandidateModal = ({ candidate, isOpen, onClose }) => {
             </div>
           </div>
         </div>
-      </div>
-
-      <div style={{
-        display: 'flex',
-        gap: '12px',
-        justifyContent: 'flex-end',
-        marginTop: '32px',
-        paddingTop: '24px',
-        borderTop: '1px solid #f0f0f0'
-      }}>
-        <button style={{
-          padding: '12px 24px',
-          background: 'white',
-          color: '#0C3D4A',
-          border: '2px solid #0C3D4A',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontWeight: '600'
-        }}>
-          Edit Profile
-        </button>
-        <button style={{
-          padding: '12px 24px',
-          background: 'linear-gradient(135deg, #0C3D4A, #1a4f5e)',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontWeight: '600'
-        }}>
-          Schedule Interview
-        </button>
       </div>
     </Modal>
   );
