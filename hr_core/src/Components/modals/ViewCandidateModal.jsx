@@ -1,5 +1,5 @@
 import React from 'react';
-import Modal from '../common/Modal'; // Adjust path as needed
+import Modal from '../common/Modal'; 
 
 const ViewCandidateModal = ({ candidate, isOpen, onClose }) => {
   if (!candidate) return null;
