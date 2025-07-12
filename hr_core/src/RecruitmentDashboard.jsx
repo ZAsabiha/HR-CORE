@@ -4,10 +4,13 @@ import './RecruitmentDashboard.css';
 
 const RecruitmentDashboard = () => {
   const [activeTab, setActiveTab] = useState('candidates');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [jobFilter, setJobFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('name');
 
   const stats = [
-    { id: 1, title: 'Total Candidates', value: '1,247', change: '+12%', icon: '👥', color: 'blue' },
+    { id: 1, title: 'Total Candidates', value: '247', change: '+12%', icon: '👥', color: 'blue' },
     { id: 2, title: 'Active Jobs', value: '23', change: '+3', icon: '💼', color: 'green' },
     { id: 3, title: 'Interviews Today', value: '8', change: '+2', icon: '📅', color: 'purple' },
     { id: 4, title: 'Avg. Time to Hire', value: '12 days', change: '-2 days', icon: '⏰', color: 'orange' }
@@ -16,9 +19,9 @@ const RecruitmentDashboard = () => {
   const candidates = [
     {
       id: 1,
-      name: 'Sarah Johnson',
-      email: 'sarah.j@email.com',
-      phone: '+1 (555) 123-4567',
+      name: 'Raisa Raihan',
+      email: 'prithwi@email.com',
+      phone: '+8801824031787',
       position: 'Senior Software Engineer',
       experience: '5+ years',
       status: 'New',
@@ -29,9 +32,9 @@ const RecruitmentDashboard = () => {
     },
     {
       id: 2,
-      name: 'Michael Rodriguez',
+      name: 'Shuvo Hossain',
       email: 'm.rodriguez@email.com',
-      phone: '+1 (555) 987-6543',
+      phone: '+880 1823-456789',
       position: 'Product Manager',
       experience: '3+ years',
       status: 'Screening',
@@ -42,9 +45,9 @@ const RecruitmentDashboard = () => {
     },
     {
       id: 3,
-      name: 'Emma Liu',
+      name: 'Ziaul Amin',
       email: 'e.liu@email.com',
-      phone: '+1 (555) 456-7890',
+      phone: '+880 1823-456789',
       position: 'UX Designer',
       experience: '4+ years',
       status: 'Interview',
@@ -55,9 +58,9 @@ const RecruitmentDashboard = () => {
     },
     {
       id: 4,
-      name: 'David Kim',
-      email: 'd.kim@email.com',
-      phone: '+1 (555) 321-0987',
+      name: 'Mohammad Karim',
+      email: 'd.karim@email.com',
+      phone: '+880 1823-456789',
       position: 'Data Scientist',
       experience: '6+ years',
       status: 'Offer',
@@ -68,9 +71,9 @@ const RecruitmentDashboard = () => {
     },
     {
       id: 5,
-      name: 'Alex Thompson',
-      email: 'a.thompson@email.com',
-      phone: '+1 (555) 654-3210',
+      name: 'Fatima Begum',
+      email: 'fatima.begum@email.com',
+      phone: '+880 1934-567890',
       position: 'DevOps Engineer',
       experience: '4+ years',
       status: 'New',
@@ -81,9 +84,9 @@ const RecruitmentDashboard = () => {
     },
     {
       id: 6,
-      name: 'Lisa Chen',
-      email: 'l.chen@email.com',
-      phone: '+1 (555) 789-0123',
+      name: 'Shohel Ahmed',
+      email: 'shohel.ahmed@email.com',
+      phone: '+880 1645-678901',
       position: 'Frontend Developer',
       experience: '3+ years',
       status: 'Screening',
@@ -115,9 +118,22 @@ const RecruitmentDashboard = () => {
   };
 
   const filteredCandidates = candidates.filter(candidate => {
-    return candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
            candidate.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
            candidate.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || candidate.status.toLowerCase() === statusFilter;
+    const matchesJob = jobFilter === 'all' || candidate.position === jobFilter;
+    
+    return matchesSearch && matchesStatus && matchesJob;
+  });
+
+  const sortedAndFilteredCandidates = filteredCandidates.sort((a, b) => {
+    switch(sortBy) {
+      case 'name': return a.name.localeCompare(b.name);
+      case 'date': return new Date(b.appliedDate) - new Date(a.appliedDate);
+      case 'rating': return b.rating - a.rating;
+      default: return 0;
+    }
   });
 
   const filteredJobs = jobPostings.filter(job => {
@@ -187,6 +203,18 @@ const RecruitmentDashboard = () => {
               {activeTab === 'candidates' ? 'Candidate Applications' : 'Active Job Postings'}
             </h2>
             <div className="search-actions">
+              {activeTab === 'candidates' && (
+                <select
+                  value={jobFilter}
+                  onChange={(e) => setJobFilter(e.target.value)}
+                  className="filter-select"
+                >
+                  <option value="all">All Positions</option>
+                  {[...new Set(candidates.map(c => c.position))].map(position => (
+                    <option key={position} value={position}>{position}</option>
+                  ))}
+                </select>
+              )}
               <div className="search-box">
                 <input
                   type="text"
@@ -198,13 +226,57 @@ const RecruitmentDashboard = () => {
                 <button className="search-icon">🔍</button>
               </div>
               <button className="filter-button">⚙️</button>
+              {activeTab === 'jobs' && (
+                <button className="btn-primary">➕ Post New Job</button>
+              )}
+              {activeTab === 'candidates' && (
+                <button className="btn-secondary">📤 Export</button>
+              )}
             </div>
           </div>
+
+          {/* Status Filter Tabs for Candidates */}
+          {activeTab === 'candidates' && (
+            <div className="status-filter-container">
+              <div className="status-filter-tabs">
+                {['all', 'new', 'screening', 'interview', 'offer'].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setStatusFilter(status)}
+                    className={`status-tab ${statusFilter === status ? 'active' : ''}`}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                    <span className="status-count">
+                      {status === 'all' 
+                        ? filteredCandidates.length 
+                        : candidates.filter(c => c.status.toLowerCase() === status && 
+                            (jobFilter === 'all' || c.position === jobFilter) &&
+                            (c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                             c.position.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                             c.email.toLowerCase().includes(searchTerm.toLowerCase()))).length
+                      }
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <div className="sort-container">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="sort-select"
+                >
+                  <option value="name">Sort by Name</option>
+                  <option value="date">Sort by Date</option>
+                  <option value="rating">Sort by Rating</option>
+                </select>
+              </div>
+            </div>
+          )}
 
           {/* Candidates Grid */}
           {activeTab === 'candidates' && (
             <div className="candidates-grid">
-              {filteredCandidates.map((candidate) => (
+              {sortedAndFilteredCandidates.map((candidate) => (
                 <div key={candidate.id} className="candidate-card">
                   <div className="candidate-header">
                     <div className="candidate-avatar">
