@@ -5,6 +5,7 @@ import ViewJobModal from './Components/modals/ViewJobModal.jsx';
 import EditJobModal from './Components/modals/EditJobModal.jsx';
 import JobApplicationsModal from './Components/modals/JobApplicationsModal.jsx';
 import CloseJobModal from './Components/modals/CloseJobModal.jsx';
+import AddJobModal from './Components/modals/AddJobModal.jsx';
 
 const JobPostingsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,6 +17,7 @@ const JobPostingsPage = () => {
   const [editJobModalOpen, setEditJobModalOpen] = useState(false);
   const [jobApplicationsModalOpen, setJobApplicationsModalOpen] = useState(false);
   const [closeJobModalOpen, setCloseJobModalOpen] = useState(false);
+  const [addJobModalOpen, setAddJobModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
 
   const stats = [
@@ -140,6 +142,12 @@ const JobPostingsPage = () => {
     console.log('Job closed:', closeData);
   };
 
+  // Handle adding new job
+  const handleAddJob = (newJob) => {
+    setJobPostings(prev => [newJob, ...prev]);
+    alert('Job posted successfully!');
+  };
+
   const getStatusClass = (status) => {
     const statusClasses = {
       'Active': 'status-active',
@@ -221,7 +229,7 @@ const JobPostingsPage = () => {
           <button className="filter-button">⚙️</button>
           <button 
             className="btn-primary"
-            onClick={() => alert('Create New Job functionality coming soon!')}
+            onClick={() => setAddJobModalOpen(true)}
           >
             ➕ Post New Job
           </button>
@@ -368,6 +376,12 @@ const JobPostingsPage = () => {
         isOpen={closeJobModalOpen}
         onClose={() => setCloseJobModalOpen(false)}
         onConfirm={handleConfirmCloseJob}
+      />
+
+      <AddJobModal
+        isOpen={addJobModalOpen}
+        onClose={() => setAddJobModalOpen(false)}
+        onAdd={handleAddJob}
       />
     </div>
   );
