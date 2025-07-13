@@ -1,10 +1,9 @@
-import React from 'react';
-import LeaveRequestsPage from './LeaveRequests';
+import MainApp from './MainApp';
 
 function App() {
   return (
-    <div className="App">
-      <LeaveRequestsPage />
+    <div>
+      <MainApp />
     </div>
   );
 }

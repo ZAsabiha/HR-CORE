@@ -37,7 +37,7 @@ const Sidebar = ({ onLogout }) => {
 import React, { useState } from "react";
 import "./Sidebar.css";
 
-const Sidebar = ({ onLogout }) => {
+const Sidebar = ({ onLogout, onNavigate, activePage }) => {
   const [expandedSections, setExpandedSections] = useState({
     employeeManagement: false,
     attendanceLeave: true, // Leave Requests should be expanded by default
@@ -53,18 +53,30 @@ const Sidebar = ({ onLogout }) => {
     }));
   };
 
+  const handleNavigate = (page) => {
+    if (onNavigate) {
+      onNavigate(page);
+    }
+  };
+
   return (
     <div className="sidebar">
       <div className="sidebar-title">HR CORE</div>
       <ul className="sidebar-menu">
         {/* Dashboard */}
-        <li className="menu-item">
+        <li 
+          className={`menu-item ${activePage === 'dashboard' ? 'active' : ''}`}
+          onClick={() => handleNavigate('dashboard')}
+        >
           <i className="bi bi-speedometer2"></i>
           <span>Dashboard</span>
         </li>
 
         {/* Features */}
-        <li className="menu-item">
+        <li 
+          className={`menu-item ${activePage === 'features' ? 'active' : ''}`}
+          onClick={() => handleNavigate('features')}
+        >
           <i className="bi bi-grid-3x3-gap"></i>
           <span>Features</span>
         </li>
@@ -81,10 +93,16 @@ const Sidebar = ({ onLogout }) => {
           </div>
           {expandedSections.employeeManagement && (
             <ul className="submenu">
-              <li className="submenu-item">
+              <li 
+                className={`submenu-item ${activePage === 'employees' ? 'active' : ''}`}
+                onClick={() => handleNavigate('employees')}
+              >
                 <span>Employees</span>
               </li>
-              <li className="submenu-item">
+              <li 
+                className={`submenu-item ${activePage === 'profile' ? 'active' : ''}`}
+                onClick={() => handleNavigate('profile')}
+              >
                 <span>Profile</span>
               </li>
             </ul>
@@ -103,10 +121,16 @@ const Sidebar = ({ onLogout }) => {
           </div>
           {expandedSections.attendanceLeave && (
             <ul className="submenu">
-              <li className="submenu-item">
+              <li 
+                className={`submenu-item ${activePage === 'attendance-logs' ? 'active' : ''}`}
+                onClick={() => handleNavigate('attendance-logs')}
+              >
                 <span>Attendance Logs</span>
               </li>
-              <li className="submenu-item active">
+              <li 
+                className={`submenu-item ${activePage === 'leave-requests' ? 'active' : ''}`}
+                onClick={() => handleNavigate('leave-requests')}
+              >
                 <span>Leave Requests</span>
               </li>
             </ul>
@@ -125,10 +149,16 @@ const Sidebar = ({ onLogout }) => {
           </div>
           {expandedSections.payrollCompensations && (
             <ul className="submenu">
-              <li className="submenu-item">
+              <li 
+                className={`submenu-item ${activePage === 'salary-management' ? 'active' : ''}`}
+                onClick={() => handleNavigate('salary-management')}
+              >
                 <span>Salary Management</span>
               </li>
-              <li className="submenu-item">
+              <li 
+                className={`submenu-item ${activePage === 'overtime-tracking' ? 'active' : ''}`}
+                onClick={() => handleNavigate('overtime-tracking')}
+              >
                 <span>Overtime Tracking</span>
               </li>
             </ul>
@@ -147,10 +177,16 @@ const Sidebar = ({ onLogout }) => {
           </div>
           {expandedSections.performance && (
             <ul className="submenu">
-              <li className="submenu-item">
+              <li 
+                className={`submenu-item ${activePage === 'goals' ? 'active' : ''}`}
+                onClick={() => handleNavigate('goals')}
+              >
                 <span>Goals</span>
               </li>
-              <li className="submenu-item">
+              <li 
+                className={`submenu-item ${activePage === 'performance-reviews' ? 'active' : ''}`}
+                onClick={() => handleNavigate('performance-reviews')}
+              >
                 <span>Performance Reviews</span>
               </li>
             </ul>
@@ -169,18 +205,27 @@ const Sidebar = ({ onLogout }) => {
           </div>
           {expandedSections.recruitment && (
             <ul className="submenu">
-              <li className="submenu-item">
-                <span>Onboarding</span>
+              <li 
+                className={`submenu-item ${activePage === 'candidates' ? 'active' : ''}`}
+                onClick={() => handleNavigate('candidates')}
+              >
+                <span>Candidates</span>
               </li>
-              <li className="submenu-item">
-                <span>Offboarding</span>
+              <li 
+                className={`submenu-item ${activePage === 'job-postings' ? 'active' : ''}`}
+                onClick={() => handleNavigate('job-postings')}
+              >
+                <span>Job Postings</span>
               </li>
             </ul>
           )}
         </li>
 
         {/* System Setting */}
-        <li className="menu-item">
+        <li 
+          className={`menu-item ${activePage === 'system-settings' ? 'active' : ''}`}
+          onClick={() => handleNavigate('system-settings')}
+        >
           <i className="bi bi-gear"></i>
           <span>System Setting</span>
 >>>>>>> sanjana
