@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from './Components/Sidebar';
 import CandidatesPage from './CandidatesPage';
 import JobPostingsPage from './JobPostingsPage';
+import LeaveRequests from './LeaveRequests';
 import './RecruitmentDashboard.css';
 
 const MainApp = () => {
@@ -28,7 +29,7 @@ const MainApp = () => {
       case 'attendance-logs':
         return <AttendanceLogsPage />;
       case 'leave-requests':
-        return <LeaveRequestsPage />;
+        return <LeaveRequests />;
       case 'salary-management':
         return <SalaryManagementPage />;
       case 'overtime-tracking':
@@ -129,19 +130,6 @@ const AttendanceLogsPage = () => (
     </div>
     <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
       <h2>Attendance Logs Page Coming Soon</h2>
-      <p>This page is under development.</p>
-    </div>
-  </div>
-);
-
-const LeaveRequestsPage = () => (
-  <div className="main-content">
-    <div className="content-header">
-      <div className="page-icon">📅</div>
-      <h1 className="page-title">Leave Requests</h1>
-    </div>
-    <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
-      <h2>Leave Requests Page Coming Soon</h2>
       <p>This page is under development.</p>
     </div>
   </div>
