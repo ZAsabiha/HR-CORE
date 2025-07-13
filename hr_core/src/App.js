@@ -1,9 +1,9 @@
-import RecruitmentDashboard from './RecruitmentDashboard';
+import MainApp from './MainApp';
 
 function App() {
   return (
     <div>
-      <RecruitmentDashboard />
+      <MainApp />
     </div>
   );
 }
