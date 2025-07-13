@@ -2,12 +2,40 @@ import React, { useState } from 'react';
 import Sidebar from './Components/Sidebar';
 import './RecruitmentDashboard.css';
 
+// Import Modal Components
+import ViewCandidateModal from './Components/modals/ViewCandidateModal.jsx';
+import EditCandidateModal from './Components/modals/EditCandidateModal.jsx';
+import ContactCandidateModal from './Components/modals/ContactCandidateModal.jsx';
+import ScheduleInterviewModal from './Components/modals/ScheduleInterviewModal.jsx';
+import AddCandidateModal from './Components/modals/AddCandidateModal.jsx';
+
+// Import Job Modal Components
+import ViewJobModal from './Components/modals/ViewJobModal.jsx';
+import EditJobModal from './Components/modals/EditJobModal.jsx';
+import JobApplicationsModal from './Components/modals/JobApplicationsModal.jsx';
+import CloseJobModal from './Components/modals/CloseJobModal.jsx';
+
 const RecruitmentDashboard = () => {
   const [activeTab, setActiveTab] = useState('candidates');
   const [statusFilter, setStatusFilter] = useState('all');
   const [jobFilter, setJobFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
+
+  // Modal states
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [addCandidateModalOpen, setAddCandidateModalOpen] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
+
+  // Job Modal states
+  const [viewJobModalOpen, setViewJobModalOpen] = useState(false);
+  const [editJobModalOpen, setEditJobModalOpen] = useState(false);
+  const [jobApplicationsModalOpen, setJobApplicationsModalOpen] = useState(false);
+  const [closeJobModalOpen, setCloseJobModalOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
 
   const stats = [
     { id: 1, title: 'Total Candidates', value: '247', change: '+12%', icon: '👥', color: 'blue' },
@@ -16,7 +44,8 @@ const RecruitmentDashboard = () => {
     { id: 4, title: 'Avg. Time to Hire', value: '12 days', change: '-2 days', icon: '⏰', color: 'orange' }
   ];
 
-  const candidates = [
+  // Changed to useState so we can update candidates
+  const [candidates, setCandidates] = useState([
     {
       id: 1,
       name: 'Raisa Raihan',
@@ -28,7 +57,7 @@ const RecruitmentDashboard = () => {
       appliedDate: '15/07/2024',
       source: 'LinkedIn',
       rating: 4.5,
-      skills: ['React', 'Node.js', 'Python']
+      skills: ['React', 'Node.js', 'Python', 'AWS', 'MongoDB']
     },
     {
       id: 2,
@@ -41,7 +70,7 @@ const RecruitmentDashboard = () => {
       appliedDate: '14/07/2024',
       source: 'Indeed',
       rating: 4.2,
-      skills: ['Product Strategy', 'Analytics', 'Leadership']
+      skills: ['Product Strategy', 'Analytics', 'Leadership', 'Agile']
     },
     {
       id: 3,
@@ -54,7 +83,7 @@ const RecruitmentDashboard = () => {
       appliedDate: '13/07/2024',
       source: 'Website',
       rating: 4.8,
-      skills: ['Figma', 'User Research', 'Prototyping']
+      skills: ['Figma', 'User Research', 'Prototyping', 'Adobe Creative Suite']
     },
     {
       id: 4,
@@ -67,7 +96,7 @@ const RecruitmentDashboard = () => {
       appliedDate: '12/07/2024',
       source: 'Referral',
       rating: 4.6,
-      skills: ['Python', 'Machine Learning', 'SQL']
+      skills: ['Python', 'Machine Learning', 'SQL', 'TensorFlow', 'R']
     },
     {
       id: 5,
@@ -80,7 +109,7 @@ const RecruitmentDashboard = () => {
       appliedDate: '11/07/2024',
       source: 'LinkedIn',
       rating: 4.3,
-      skills: ['AWS', 'Docker', 'Kubernetes']
+      skills: ['AWS', 'Docker', 'Kubernetes', 'Jenkins', 'Terraform']
     },
     {
       id: 6,
@@ -93,17 +122,105 @@ const RecruitmentDashboard = () => {
       appliedDate: '10/07/2024',
       source: 'Indeed',
       rating: 4.1,
-      skills: ['Vue.js', 'CSS', 'JavaScript']
+      skills: ['Vue.js', 'CSS', 'JavaScript', 'TypeScript', 'Sass']
     }
-  ];
+  ]);
 
-  const jobPostings = [
+  const [jobPostings, setJobPostings] = useState([
     { id: 1, title: 'Senior Software Engineer', department: 'Engineering', applicants: 45, status: 'Active', location: 'Remote', postedDate: '01/07/2024' },
     { id: 2, title: 'Product Manager', department: 'Product', applicants: 32, status: 'Active', location: 'New York', postedDate: '28/06/2024' },
     { id: 3, title: 'UX Designer', department: 'Design', applicants: 28, status: 'Draft', location: 'San Francisco', postedDate: '25/06/2024' },
     { id: 4, title: 'Data Scientist', department: 'Analytics', applicants: 19, status: 'Active', location: 'Remote', postedDate: '22/06/2024' },
     { id: 5, title: 'DevOps Engineer', department: 'Engineering', applicants: 15, status: 'Active', location: 'Austin', postedDate: '20/06/2024' }
-  ];
+  ]);
+
+  // Modal action handlers
+  const handleViewCandidate = (candidate) => {
+    setSelectedCandidate(candidate);
+    setViewModalOpen(true);
+  };
+
+  const handleEditCandidate = (candidate) => {
+    setSelectedCandidate(candidate);
+    setEditModalOpen(true);
+  };
+
+  const handleContactCandidate = (candidate) => {
+    setSelectedCandidate(candidate);
+    setContactModalOpen(true);
+  };
+
+  const handleScheduleInterview = (candidate) => {
+    setSelectedCandidate(candidate);
+    setScheduleModalOpen(true);
+  };
+
+  // Save candidate changes
+  const handleSaveCandidate = (updatedCandidate) => {
+    setCandidates(prev => 
+      prev.map(candidate => 
+        candidate.id === updatedCandidate.id ? updatedCandidate : candidate
+      )
+    );
+  };
+
+  // Add new candidate
+  const handleAddCandidate = (newCandidate) => {
+    setCandidates(prev => [newCandidate, ...prev]);
+    alert('Candidate added successfully!');
+  };
+
+  // Handle interview scheduling
+  const handleScheduleInterviewSave = (interviewData) => {
+    // Here you would typically save the interview to your backend
+    console.log('Interview scheduled:', interviewData);
+    
+    // Update candidate status to Interview if not already
+    if (selectedCandidate && selectedCandidate.status === 'New' || selectedCandidate.status === 'Screening') {
+      const updatedCandidate = { ...selectedCandidate, status: 'Interview' };
+      handleSaveCandidate(updatedCandidate);
+    }
+  };
+
+  // Job action handlers
+  const handleViewJob = (job) => {
+    setSelectedJob(job);
+    setViewJobModalOpen(true);
+  };
+
+  const handleEditJob = (job) => {
+    setSelectedJob(job);
+    setEditJobModalOpen(true);
+  };
+
+  const handleViewJobApplications = (job) => {
+    setSelectedJob(job);
+    setJobApplicationsModalOpen(true);
+  };
+
+  const handleCloseJob = (job) => {
+    setSelectedJob(job);
+    setCloseJobModalOpen(true);
+  };
+
+  // Save job changes
+  const handleSaveJob = (updatedJob) => {
+    setJobPostings(prev => 
+      prev.map(job => 
+        job.id === updatedJob.id ? updatedJob : job
+      )
+    );
+  };
+
+  // Handle job closure
+  const handleConfirmCloseJob = (closeData) => {
+    setJobPostings(prev => 
+      prev.map(job => 
+        job.id === closeData.jobId ? { ...job, status: 'Closed' } : job
+      )
+    );
+    console.log('Job closed:', closeData);
+  };
 
   const getStatusClass = (status) => {
     const statusClasses = {
@@ -230,7 +347,48 @@ const RecruitmentDashboard = () => {
                 <button className="btn-primary">➕ Post New Job</button>
               )}
               {activeTab === 'candidates' && (
-                <button className="btn-secondary">📤 Export</button>
+                <button
+                  onClick={() => setAddCandidateModalOpen(true)}
+                  style={{
+                    padding: '12px 24px',
+                    background: 'linear-gradient(135deg, #0C3D4A, #1a4f5e)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 15px rgba(12, 61, 74, 0.3)',
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(12, 61, 74, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 15px rgba(12, 61, 74, 0.3)';
+                  }}
+                >
+                  <span style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '50%',
+                    width: '24px',
+                    height: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '16px'
+                  }}>
+                    ➕
+                  </span>
+                  Add New Candidate
+                </button>
               )}
             </div>
           </div>
@@ -327,10 +485,30 @@ const RecruitmentDashboard = () => {
                   </div>
 
                   <div className="candidate-actions">
-                    <button className="action-btn btn-view">👁️ View</button>
-                    <button className="action-btn btn-edit">✏️ Edit</button>
-                    <button className="action-btn btn-contact">💬 Contact</button>
-                    <button className="action-btn btn-schedule">📅 Schedule</button>
+                    <button 
+                      className="action-btn btn-view"
+                      onClick={() => handleViewCandidate(candidate)}
+                    >
+                      👁️ View
+                    </button>
+                    <button 
+                      className="action-btn btn-edit"
+                      onClick={() => handleEditCandidate(candidate)}
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button 
+                      className="action-btn btn-contact"
+                      onClick={() => handleContactCandidate(candidate)}
+                    >
+                      💬 Contact
+                    </button>
+                    <button 
+                      className="action-btn btn-schedule"
+                      onClick={() => handleScheduleInterview(candidate)}
+                    >
+                      📅 Schedule
+                    </button>
                   </div>
                 </div>
               ))}
@@ -371,10 +549,30 @@ const RecruitmentDashboard = () => {
                   </div>
 
                   <div className="job-actions">
-                    <button className="action-btn btn-view">👁️ View</button>
-                    <button className="action-btn btn-edit">✏️ Edit</button>
-                    <button className="action-btn btn-applications">📋 Applications</button>
-                    <button className="action-btn btn-close">❌ Close</button>
+                    <button 
+                      className="action-btn btn-view"
+                      onClick={() => handleViewJob(job)}
+                    >
+                      👁️ View
+                    </button>
+                    <button 
+                      className="action-btn btn-edit"
+                      onClick={() => handleEditJob(job)}
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button 
+                      className="action-btn btn-applications"
+                      onClick={() => handleViewJobApplications(job)}
+                    >
+                      📋 Applications
+                    </button>
+                    <button 
+                      className="action-btn btn-close"
+                      onClick={() => handleCloseJob(job)}
+                    >
+                      ❌ Close
+                    </button>
                   </div>
                 </div>
               ))}
@@ -382,6 +580,67 @@ const RecruitmentDashboard = () => {
           )}
         </div>
       </div>
+
+      {/* Modal Components */}
+      <ViewCandidateModal
+        candidate={selectedCandidate}
+        isOpen={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+      />
+      
+      <EditCandidateModal
+        candidate={selectedCandidate}
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onSave={handleSaveCandidate}
+      />
+      
+      <ContactCandidateModal
+        candidate={selectedCandidate}
+        isOpen={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+      />
+      
+      <ScheduleInterviewModal
+        candidate={selectedCandidate}
+        isOpen={scheduleModalOpen}
+        onClose={() => setScheduleModalOpen(false)}
+        onSchedule={handleScheduleInterviewSave}
+      />
+
+      <AddCandidateModal
+        isOpen={addCandidateModalOpen}
+        onClose={() => setAddCandidateModalOpen(false)}
+        onAdd={handleAddCandidate}
+        jobPostings={jobPostings}
+      />
+
+      {/* Job Modal Components */}
+      <ViewJobModal
+        job={selectedJob}
+        isOpen={viewJobModalOpen}
+        onClose={() => setViewJobModalOpen(false)}
+      />
+      
+      <EditJobModal
+        job={selectedJob}
+        isOpen={editJobModalOpen}
+        onClose={() => setEditJobModalOpen(false)}
+        onSave={handleSaveJob}
+      />
+      
+      <JobApplicationsModal
+        job={selectedJob}
+        isOpen={jobApplicationsModalOpen}
+        onClose={() => setJobApplicationsModalOpen(false)}
+      />
+      
+      <CloseJobModal
+        job={selectedJob}
+        isOpen={closeJobModalOpen}
+        onClose={() => setCloseJobModalOpen(false)}
+        onConfirm={handleConfirmCloseJob}
+      />
     </div>
   );
 };
