@@ -1,6 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
 import { Search, Download, Calendar, Filter, Clock, Users, TrendingUp, Eye } from 'lucide-react';
+
+import Sidebar from '../Front-end/Components/Sidebar';
+import '../Front-end/Components/Sidebar.css';
 
 const AttendanceLogsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -139,9 +141,20 @@ const AttendanceLogsPage = () => {
     );
   };
 
+  // Handle logout function for sidebar
+  const handleLogout = () => {
+    // Add your logout logic here
+    console.log('Logout clicked');
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="flex min-h-screen">
+      {/* Sidebar */}
+      <Sidebar onLogout={handleLogout} />
+      
+      {/* Main Content */}
+      <div className="flex-1 bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
         {/* Stats Cards */}
         <div className="grid grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
@@ -383,9 +396,10 @@ const AttendanceLogsPage = () => {
               </button>
             </div>
           </div>
-        )}
+          )}
+        </div>
+        </div>
       </div>
-    </div>
   );
 };
 
