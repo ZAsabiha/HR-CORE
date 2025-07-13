@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Download, Calendar, Filter, Clock, Users, TrendingUp, Eye } from 'lucide-react';
+import { Search, Download, Calendar, Filter, Clock, Users, TrendingUp, Eye, Menu, ChevronDown } from 'lucide-react';
 import Sidebar from './Sidebar';
 import './AttendanceLogs.css';
 
@@ -8,7 +8,7 @@ const AttendanceLogs = () => {
   const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [dateRange, setDateRange] = useState('today');
-
+  const [topSearchTerm, setTopSearchTerm] = useState('');
 
   const handleLogout = () => {
     console.log('Logout clicked');
@@ -116,7 +116,6 @@ const AttendanceLogs = () => {
     });
   }, [searchTerm, selectedDepartment, selectedStatus, attendanceData]);
 
-
   const stats = useMemo(() => {
     const total = filteredData.length;
     const present = filteredData.filter(r => r.status === 'present' || r.status === 'late' || r.status === 'overtime' || r.status === 'early_departure').length;
@@ -158,6 +157,39 @@ const AttendanceLogs = () => {
     <div className="attendance-layout">
       <Sidebar onLogout={handleLogout} />
       <div className="attendance-main-content">
+        {/* Top Navigation Header */}
+        <div className="top-navigation">
+          <div className="nav-left">
+            <Menu className="menu-icon" />
+            <div className="employee-dropdown">
+              <Users className="dropdown-icon" />
+              <span className="dropdown-text">All Employees</span>
+              <ChevronDown className="dropdown-arrow" />
+            </div>
+            <div className="top-search-box">
+              <Search className="top-search-icon" />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="top-search-input"
+                value={topSearchTerm}
+                onChange={(e) => setTopSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="nav-right">
+            <a href="#" className="nav-link">Home</a>
+            <a href="#" className="nav-link">About</a>
+            <a href="#" className="nav-link">Contacts</a>
+            <a href="#" className="nav-link">Login</a>
+          </div>
+        </div>
+
+        {/* Page Title */}
+        <div className="page-header">
+          <h1 className="page-title">Attendance Logs</h1>
+        </div>
+
         <div className="attendance-container">
           {/* Stats Cards */}
           <div className="stats-grid">
