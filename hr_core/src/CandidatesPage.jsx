@@ -21,6 +21,9 @@ const CandidatesPage = () => {
   const [addCandidateModalOpen, setAddCandidateModalOpen] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
 
+  // Store interviews separately
+  const [interviews, setInterviews] = useState([]);
+
   const stats = [
     { id: 1, title: 'Total Candidates', value: '247', change: '+12%', icon: '👥', color: 'blue' },
     { id: 2, title: 'New Applications', value: '45', change: '+8', icon: '📝', color: 'green' },
@@ -28,7 +31,6 @@ const CandidatesPage = () => {
     { id: 4, title: 'Offers Extended', value: '5', change: '+2', icon: '✅', color: 'orange' }
   ];
 
-  // Changed to useState so we can update candidates
   const [candidates, setCandidates] = useState([
     {
       id: 1,
@@ -154,16 +156,29 @@ const CandidatesPage = () => {
     alert('Candidate added successfully!');
   };
 
-  // Handle interview scheduling
+  // Handle interview scheduling - NOW STORES INTERVIEW DATA
   const handleScheduleInterviewSave = (interviewData) => {
-    // Here you would typically save the interview to your backend
-    console.log('Interview scheduled:', interviewData);
+    // Store the interview
+    const newInterview = {
+      ...interviewData,
+      id: Date.now(), // Simple ID generation
+      createdAt: new Date().toISOString()
+    };
+    
+    setInterviews(prev => [...prev, newInterview]);
     
     // Update candidate status to Interview if not already
     if (selectedCandidate && (selectedCandidate.status === 'New' || selectedCandidate.status === 'Screening')) {
       const updatedCandidate = { ...selectedCandidate, status: 'Interview' };
       handleSaveCandidate(updatedCandidate);
     }
+    
+    console.log('Interview scheduled:', newInterview);
+  };
+
+  // Get interviews for a specific candidate
+  const getCandidateInterviews = (candidateId) => {
+    return interviews.filter(interview => interview.candidateId === candidateId);
   };
 
   const getStatusClass = (status) => {
@@ -261,17 +276,7 @@ const CandidatesPage = () => {
               alignItems: 'center',
               gap: '8px',
               boxShadow: '0 4px 15px rgba(12, 61, 74, 0.3)',
-              transition: 'all 0.3s ease',
-              position: 'relative',
-              overflow: 'hidden'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 6px 20px rgba(12, 61, 74, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 4px 15px rgba(12, 61, 74, 0.3)';
+              transition: 'all 0.3s ease'
             }}
           >
             <span style={{
@@ -412,6 +417,7 @@ const CandidatesPage = () => {
       {/* Modal Components */}
       <ViewCandidateModal
         candidate={selectedCandidate}
+        candidateInterviews={selectedCandidate ? getCandidateInterviews(selectedCandidate.id) : []}
         isOpen={viewModalOpen}
         onClose={() => setViewModalOpen(false)}
       />

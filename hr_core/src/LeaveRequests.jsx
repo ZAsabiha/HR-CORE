@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, ChevronDown, Calendar, User, Clock } from 'lucide-react';
+import { Search, Filter, ChevronDown, Calendar, User, Clock, CheckCircle, XCircle, Eye } from 'lucide-react';
 
 const LeaveManagement = () => {
   const [activeTab, setActiveTab] = useState('requests');
@@ -125,6 +125,8 @@ const LeaveManagement = () => {
   };
 
   const handleAction = (action, requestId) => {
+    const request = leaveRequests.find(req => req.id === requestId);
+    
     if (action === 'approve') {
       setLeaveRequests(prev => 
         prev.map(req => 
@@ -138,6 +140,7 @@ const LeaveManagement = () => {
             : req
         )
       );
+      console.log(`✅ Approved ${request?.name}'s ${request?.type} leave request`);
     } else if (action === 'decline') {
       setLeaveRequests(prev => 
         prev.map(req => 
@@ -151,92 +154,256 @@ const LeaveManagement = () => {
             : req
         )
       );
+      console.log(`❌ Declined ${request?.name}'s ${request?.type} leave request`);
+    } else if (action === 'comment') {
+      console.log(`💬 Adding comment to ${request?.name}'s leave request`);
+      // This would open a comment modal in a real application
+    } else if (action === 'reconsider') {
+      setLeaveRequests(prev => 
+        prev.map(req => 
+          req.id === requestId 
+            ? { 
+                ...req, 
+                status: 'Pending', 
+                approvedBy: null, 
+                approvedDate: null 
+              }
+            : req
+        )
+      );
+      console.log(`🔄 Reconsidering ${request?.name}'s leave request`);
+    } else if (action === 'details') {
+      console.log(`👁️ Viewing details for ${request?.name}'s ${request?.type} leave request`);
+      // This would open a detailed view modal in a real application
     }
-    console.log(`${action} action for request ${requestId}`);
   };
 
-  const ActionButton = ({ status, requestId }) => {
+  const ActionButton = ({ status, requestId, request }) => {
+    // Safety check to ensure request exists
+    if (!request) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', minWidth: '140px' }}>
+          <button 
+            style={{
+              padding: '0.5rem 0.75rem',
+              borderRadius: '0.375rem',
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              border: 'none',
+              cursor: 'pointer',
+              backgroundColor: '#6b7280',
+              color: 'white'
+            }}
+            disabled
+          >
+            Loading...
+          </button>
+        </div>
+      );
+    }
+
     if (status === 'Pending') {
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', minWidth: '120px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', minWidth: '140px' }}>
           <button 
             onClick={() => handleAction('approve', requestId)}
             style={{
-              padding: '0.375rem 0.75rem',
-              borderRadius: '0.25rem',
+              padding: '0.5rem 0.75rem',
+              borderRadius: '0.375rem',
               fontSize: '0.75rem',
               fontWeight: '500',
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               textAlign: 'center',
-              minHeight: '28px',
+              minHeight: '32px',
               backgroundColor: '#059669',
-              color: 'white'
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.375rem'
             }}
+            title={`Approve ${request.name || 'employee'}'s ${(request.type || 'leave').toLowerCase()} leave request`}
           >
-            Approve
+            <CheckCircle size={14} />
+            Approve Request
           </button>
           <button 
             onClick={() => handleAction('decline', requestId)}
             style={{
-              padding: '0.375rem 0.75rem',
-              borderRadius: '0.25rem',
+              padding: '0.5rem 0.75rem',
+              borderRadius: '0.375rem',
               fontSize: '0.75rem',
               fontWeight: '500',
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               textAlign: 'center',
-              minHeight: '28px',
+              minHeight: '32px',
               backgroundColor: '#dc2626',
-              color: 'white'
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.375rem'
             }}
+            title={`Decline ${request.name || 'employee'}'s ${(request.type || 'leave').toLowerCase()} leave request`}
           >
-            Decline
+            <XCircle size={14} />
+            Decline Request
           </button>
           <button 
+            onClick={() => handleAction('details', requestId)}
             style={{
-              padding: '0.375rem 0.75rem',
-              borderRadius: '0.25rem',
+              padding: '0.5rem 0.75rem',
+              borderRadius: '0.375rem',
               fontSize: '0.75rem',
               fontWeight: '500',
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               textAlign: 'center',
-              minHeight: '28px',
+              minHeight: '32px',
               backgroundColor: '#0C3D4A',
-              color: 'white'
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.375rem'
             }}
+            title="View full request details and supporting documents"
           >
+            <Eye size={14} />
             View Details
           </button>
         </div>
       );
     }
 
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', minWidth: '120px' }}>
-        <button 
-          style={{
+    if (status === 'Approved') {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', minWidth: '140px' }}>
+          <div style={{
             padding: '0.375rem 0.75rem',
-            borderRadius: '0.25rem',
+            borderRadius: '0.375rem',
             fontSize: '0.75rem',
             fontWeight: '500',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
             textAlign: 'center',
             minHeight: '28px',
-            backgroundColor: '#0C3D4A',
-            color: 'white'
-          }}
-        >
-          View Details
-        </button>
-      </div>
-    );
+            backgroundColor: '#dcfce7',
+            color: '#166534',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.375rem',
+            border: '1px solid #bbf7d0'
+          }}>
+            <CheckCircle size={14} />
+            Approved
+          </div>
+          <button 
+            onClick={() => handleAction('details', requestId)}
+            style={{
+              padding: '0.5rem 0.75rem',
+              borderRadius: '0.375rem',
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              textAlign: 'center',
+              minHeight: '32px',
+              backgroundColor: '#0C3D4A',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.375rem'
+            }}
+            title="View complete request and approval details"
+          >
+            <Eye size={14} />
+            View Details
+          </button>
+        </div>
+      );
+    }
+
+    if (status === 'Declined') {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', minWidth: '140px' }}>
+          <div style={{
+            padding: '0.375rem 0.75rem',
+            borderRadius: '0.375rem',
+            fontSize: '0.75rem',
+            fontWeight: '500',
+            textAlign: 'center',
+            minHeight: '28px',
+            backgroundColor: '#fee2e2',
+            color: '#991b1b',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.375rem',
+            border: '1px solid #fecaca'
+          }}>
+            <XCircle size={14} />
+            Declined
+          </div>
+          <button 
+            onClick={() => handleAction('reconsider', requestId)}
+            style={{
+              padding: '0.5rem 0.75rem',
+              borderRadius: '0.375rem',
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              border: '1px solid #d1d5db',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              textAlign: 'center',
+              minHeight: '32px',
+              backgroundColor: 'white',
+              color: '#374151',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.375rem'
+            }}
+            title="Reconsider this declined request"
+          >
+            <CheckCircle size={14} />
+            Reconsider
+          </button>
+          <button 
+            onClick={() => handleAction('details', requestId)}
+            style={{
+              padding: '0.5rem 0.75rem',
+              borderRadius: '0.375rem',
+              fontSize: '0.75rem',
+              fontWeight: '500',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              textAlign: 'center',
+              minHeight: '32px',
+              backgroundColor: '#0C3D4A',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.375rem'
+            }}
+            title="View request details and decline reason"
+          >
+            <Eye size={14} />
+            View Details
+          </button>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   // Filter requests based on active tab
@@ -578,7 +745,7 @@ const LeaveManagement = () => {
                     color: '#6b7280', 
                     textTransform: 'uppercase', 
                     letterSpacing: '0.05em',
-                    width: '140px'
+                    width: '160px'
                   }}>
                     Actions
                   </th>
@@ -638,10 +805,11 @@ const LeaveManagement = () => {
                     </td>
                   )}
                   {activeTab === 'requests' && (
-                    <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap', fontSize: '0.875rem', color: '#111827', width: '140px' }}>
+                    <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap', fontSize: '0.875rem', color: '#111827', width: '160px' }}>
                       <ActionButton 
                         status={request.status}
                         requestId={request.id}
+                        request={request}
                       />
                     </td>
                   )}
