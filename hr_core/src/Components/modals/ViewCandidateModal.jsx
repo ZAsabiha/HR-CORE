@@ -1,8 +1,48 @@
 import React from 'react';
 import Modal from '../common/Modal';
 
-const ViewCandidateModal = ({ candidate, isOpen, onClose }) => {
+const ViewCandidateModal = ({ candidate, candidateInterviews, isOpen, onClose }) => {
   if (!candidate) return null;
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const formatTime = (timeString) => {
+    const [hours, minutes] = timeString.split(':');
+    const date = new Date();
+    date.setHours(parseInt(hours), parseInt(minutes));
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const getInterviewTypeIcon = (type) => {
+    switch(type) {
+      case 'video': return '📹';
+      case 'phone': return '📞';
+      case 'in-person': return '🏢';
+      default: return '📅';
+    }
+  };
+
+  const getInterviewStatusColor = (interview) => {
+    const interviewDate = new Date(interview.date);
+    const now = new Date();
+    
+    if (interviewDate > now) {
+      return '#0ea5e9'; // Blue for upcoming
+    } else {
+      return '#10b981'; // Green for completed
+    }
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Candidate Profile" size="large">
@@ -49,10 +89,12 @@ const ViewCandidateModal = ({ candidate, isOpen, onClose }) => {
                   fontWeight: '600',
                   background: candidate.status === 'New' ? '#fff3cd' : 
                             candidate.status === 'Screening' ? '#e7f3ff' :
-                            candidate.status === 'Interview' ? '#f3e8ff' : '#d4edda',
+                            candidate.status === 'Interview' ? '#f3e8ff' : 
+                            candidate.status === 'Offer' ? '#d4edda' : '#f8d7da',
                   color: candidate.status === 'New' ? '#856404' : 
                          candidate.status === 'Screening' ? '#0056b3' :
-                         candidate.status === 'Interview' ? '#7c2d12' : '#155724'
+                         candidate.status === 'Interview' ? '#7c2d12' : 
+                         candidate.status === 'Offer' ? '#155724' : '#721c24'
                 }}>
                   {candidate.status}
                 </span>
@@ -122,20 +164,120 @@ const ViewCandidateModal = ({ candidate, isOpen, onClose }) => {
           <div style={{ marginBottom: '24px' }}>
             <h4 style={{ marginBottom: '16px', fontSize: '18px', color: '#0C3D4A' }}>
               Interview History
+              <span style={{
+                marginLeft: '8px',
+                backgroundColor: '#0C3D4A',
+                color: 'white',
+                fontSize: '12px',
+                padding: '2px 8px',
+                borderRadius: '10px',
+                fontWeight: '500'
+              }}>
+                {candidateInterviews.length}
+              </span>
             </h4>
             <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '12px' }}>
-              <div style={{ textAlign: 'center', color: '#666', padding: '20px' }}>
-                No interviews scheduled yet
-              </div>
+              {candidateInterviews.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {candidateInterviews.map((interview, index) => (
+                    <div key={interview.id} style={{
+                      background: 'white',
+                      padding: '16px',
+                      borderRadius: '8px',
+                      border: '1px solid #e2e8f0',
+                      borderLeft: `4px solid ${getInterviewStatusColor(interview)}`
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <div style={{ fontWeight: '600', color: '#0C3D4A' }}>
+                          {getInterviewTypeIcon(interview.type)} Round {interview.round}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#666' }}>
+                          {formatDate(interview.date)}
+                        </div>
+                      </div>
+                      
+                      <div style={{ fontSize: '14px', color: '#333', marginBottom: '8px' }}>
+                        <strong>Time:</strong> {formatTime(interview.time)} ({interview.duration} min)
+                      </div>
+                      
+                      <div style={{ fontSize: '14px', color: '#333', marginBottom: '8px' }}>
+                        <strong>Interviewer:</strong> {interview.interviewer}
+                      </div>
+                      
+                      {interview.location && (
+                        <div style={{ fontSize: '14px', color: '#333', marginBottom: '8px' }}>
+                          <strong>
+                            {interview.type === 'video' ? 'Meeting Link:' : 
+                             interview.type === 'phone' ? 'Phone:' : 'Location:'}
+                          </strong> {interview.location}
+                        </div>
+                      )}
+                      
+                      {interview.notes && (
+                        <div style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
+                          <strong>Notes:</strong> {interview.notes}
+                        </div>
+                      )}
+                      
+                      <div style={{
+                        marginTop: '8px',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        background: new Date(interview.date) > new Date() ? '#dbeafe' : '#dcfce7',
+                        color: new Date(interview.date) > new Date() ? '#1e40af' : '#16a34a'
+                      }}>
+                        {new Date(interview.date) > new Date() ? 'Upcoming' : 'Completed'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', color: '#666', padding: '20px' }}>
+                  📅 No interviews scheduled yet
+                </div>
+              )}
             </div>
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <h4 style={{ marginBottom: '16px', fontSize: '18px', color: '#0C3D4A' }}>Notes</h4>
+            <h4 style={{ marginBottom: '16px', fontSize: '18px', color: '#0C3D4A' }}>
+              Notes
+              <span style={{
+                marginLeft: '8px',
+                backgroundColor: '#0C3D4A',
+                color: 'white',
+                fontSize: '12px',
+                padding: '2px 8px',
+                borderRadius: '10px',
+                fontWeight: '500'
+              }}>
+                {candidate.notes?.length || 0}
+              </span>
+            </h4>
             <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '12px' }}>
-              <div style={{ textAlign: 'center', color: '#666', padding: '20px' }}>
-                No notes added yet
-              </div>
+              {candidate.notes && candidate.notes.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {candidate.notes.map((note, index) => (
+                    <div key={index} style={{
+                      background: 'white',
+                      padding: '12px',
+                      borderRadius: '6px',
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      <div style={{ fontSize: '14px', color: '#333' }}>{note.content}</div>
+                      <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                        {note.date} by {note.author}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', color: '#666', padding: '20px' }}>
+                  📝 No notes added yet
+                </div>
+              )}
             </div>
           </div>
         </div>
