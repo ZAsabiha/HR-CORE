@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal'; 
 
 const ScheduleInterviewModal = ({ candidate, isOpen, onClose, onSchedule }) => {
@@ -15,8 +15,115 @@ const ScheduleInterviewModal = ({ candidate, isOpen, onClose, onSchedule }) => {
 
   const today = new Date().toISOString().split('T')[0];
 
+  // Get available interview types based on candidate status
+  const getAvailableInterviewTypes = (candidateStatus) => {
+    if (candidateStatus === 'New') {
+      return [
+        { value: 'phone', label: '📞 Phone Screening', defaultDuration: '30' },
+        { value: 'video', label: '📹 Video Screening', defaultDuration: '45' }
+      ];
+    }
+    
+    // For Screening, Interview, and Offer candidates
+    return [
+      { value: 'phone', label: '📞 Phone Call', defaultDuration: '30' },
+      { value: 'video', label: '📹 Video Call', defaultDuration: '60' },
+      { value: 'in-person', label: '🏢 In-Person', defaultDuration: '60' }
+    ];
+  };
+
+  // Get interview rounds based on candidate status
+  const getInterviewRounds = (candidateStatus) => {
+    if (candidateStatus === 'New') {
+      return [
+        { value: '1', label: 'Initial Phone Screening' },
+        { value: '1', label: 'Initial Video Screening' }
+      ];
+    } else if (candidateStatus === 'Screening') {
+      return [
+        { value: '1', label: 'Round 1 - Technical Interview' },
+        { value: '1', label: 'Round 1 - Behavioral Interview' },
+        { value: '1', label: 'Round 1 - Department Interview' }
+      ];
+    } else {
+      return [
+        { value: '2', label: 'Round 2 - Technical Interview' },
+        { value: '2', label: 'Round 2 - Team Interview' },
+        { value: '3', label: 'Round 3 - Final Interview' },
+        { value: '4', label: 'Round 4 - Leadership Interview' },
+        { value: 'other', label: 'Other' }
+      ];
+    }
+  };
+
+  // Get status-based suggestions
+  const getStatusSuggestions = (candidateStatus) => {
+    switch (candidateStatus) {
+      case 'New':
+        return {
+          title: 'Initial Screening',
+          suggestion: 'Schedule a brief screening call to assess basic qualifications',
+          recommendedDuration: '30-45 minutes',
+          recommendedType: 'phone'
+        };
+      case 'Screening':
+        return {
+          title: 'Formal Interview',
+          suggestion: 'Schedule a comprehensive interview to evaluate technical and cultural fit',
+          recommendedDuration: '60-90 minutes',
+          recommendedType: 'video'
+        };
+      case 'Interview':
+        return {
+          title: 'Additional Round',
+          suggestion: 'Schedule follow-up interview or final round with leadership',
+          recommendedDuration: '60-90 minutes',
+          recommendedType: 'in-person'
+        };
+      default:
+        return {
+          title: 'Interview',
+          suggestion: 'Schedule interview',
+          recommendedDuration: '60 minutes',
+          recommendedType: 'video'
+        };
+    }
+  };
+
+  // Initialize form with smart defaults based on candidate status
+  useEffect(() => {
+    if (candidate) {
+      const availableTypes = getAvailableInterviewTypes(candidate.status);
+      const suggestions = getStatusSuggestions(candidate.status);
+      
+      // Find the recommended type or use the first available
+      const recommendedType = availableTypes.find(type => type.value === suggestions.recommendedType);
+      const defaultType = recommendedType || availableTypes[0];
+      
+      setInterviewData(prev => ({
+        ...prev,
+        type: defaultType.value,
+        duration: defaultType.defaultDuration,
+        round: candidate.status === 'New' ? '1' : 
+               candidate.status === 'Screening' ? '1' : '2'
+      }));
+    }
+  }, [candidate]);
+
   const handleInputChange = (field, value) => {
     setInterviewData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Auto-adjust duration when interview type changes
+  const handleTypeChange = (type) => {
+    const availableTypes = getAvailableInterviewTypes(candidate.status);
+    const selectedType = availableTypes.find(t => t.value === type);
+    
+    setInterviewData(prev => ({
+      ...prev,
+      type: type,
+      duration: selectedType?.defaultDuration || '60'
+    }));
   };
 
   const handleSchedule = () => {
@@ -36,7 +143,6 @@ const ScheduleInterviewModal = ({ candidate, isOpen, onClose, onSchedule }) => {
     };
     
     onSchedule(interview);
-    alert('Interview scheduled successfully!');
     
     // Reset form
     setInterviewData({
@@ -55,8 +161,43 @@ const ScheduleInterviewModal = ({ candidate, isOpen, onClose, onSchedule }) => {
 
   if (!candidate) return null;
 
+  const availableTypes = getAvailableInterviewTypes(candidate.status);
+  const availableRounds = getInterviewRounds(candidate.status);
+  const suggestions = getStatusSuggestions(candidate.status);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Schedule Interview" size="medium">
+      {/* Status-based Suggestions */}
+      <div style={{
+        background: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)',
+        padding: '16px 20px',
+        borderRadius: '12px',
+        marginBottom: '24px',
+        border: '1px solid #bae6fd'
+      }}>
+        <h4 style={{ 
+          margin: '0 0 8px 0', 
+          fontSize: '14px', 
+          color: '#0c4a6e',
+          fontWeight: '600'
+        }}>
+          💡 {suggestions.title} Recommendation
+        </h4>
+        <div style={{ 
+          fontSize: '13px', 
+          color: '#075985',
+          marginBottom: '8px'
+        }}>
+          {suggestions.suggestion}
+        </div>
+        <div style={{ 
+          fontSize: '12px', 
+          color: '#0369a1'
+        }}>
+          Recommended: {suggestions.recommendedDuration} • {suggestions.recommendedType}
+        </div>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
         {/* Left Column */}
         <div>
@@ -130,11 +271,20 @@ const ScheduleInterviewModal = ({ candidate, isOpen, onClose, onSchedule }) => {
                 boxSizing: 'border-box'
               }}
             >
-              <option value="30">30 minutes</option>
-              <option value="45">45 minutes</option>
-              <option value="60">60 minutes</option>
-              <option value="90">90 minutes</option>
-              <option value="120">2 hours</option>
+              {candidate.status === 'New' ? (
+                <>
+                  <option value="30">30 minutes</option>
+                  <option value="45">45 minutes</option>
+                </>
+              ) : (
+                <>
+                  <option value="30">30 minutes</option>
+                  <option value="45">45 minutes</option>
+                  <option value="60">60 minutes</option>
+                  <option value="90">90 minutes</option>
+                  <option value="120">2 hours</option>
+                </>
+              )}
             </select>
           </div>
 
@@ -159,11 +309,9 @@ const ScheduleInterviewModal = ({ candidate, isOpen, onClose, onSchedule }) => {
                 boxSizing: 'border-box'
               }}
             >
-              <option value="1">Round 1 - Initial Screening</option>
-              <option value="2">Round 2 - Technical Interview</option>
-              <option value="3">Round 3 - Final Interview</option>
-              <option value="4">Round 4 - Leadership Interview</option>
-              <option value="other">Other</option>
+              {availableRounds.map((round, index) => (
+                <option key={index} value={round.value}>{round.label}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -178,10 +326,19 @@ const ScheduleInterviewModal = ({ candidate, isOpen, onClose, onSchedule }) => {
               color: '#333' 
             }}>
               Interview Type
+              {candidate.status === 'New' && (
+                <span style={{ 
+                  fontSize: '12px', 
+                  color: '#0369a1', 
+                  marginLeft: '8px' 
+                }}>
+                  (Screening only)
+                </span>
+              )}
             </label>
             <select
               value={interviewData.type}
-              onChange={(e) => handleInputChange('type', e.target.value)}
+              onChange={(e) => handleTypeChange(e.target.value)}
               style={{
                 width: '100%',
                 padding: '12px 16px',
@@ -191,9 +348,9 @@ const ScheduleInterviewModal = ({ candidate, isOpen, onClose, onSchedule }) => {
                 boxSizing: 'border-box'
               }}
             >
-              <option value="video">📹 Video Call</option>
-              <option value="phone">📞 Phone Call</option>
-              <option value="in-person">🏢 In-Person</option>
+              {availableTypes.map((type, index) => (
+                <option key={index} value={type.value}>{type.label}</option>
+              ))}
             </select>
           </div>
 
@@ -311,6 +468,35 @@ const ScheduleInterviewModal = ({ candidate, isOpen, onClose, onSchedule }) => {
         }}>
           Current Status: {candidate.status} • Applied: {candidate.appliedDate}
         </div>
+        
+        {/* Status Change Preview */}
+        {candidate.status === 'New' && (interviewData.type === 'phone' || interviewData.type === 'video') && (
+          <div style={{
+            marginTop: '8px',
+            padding: '6px 12px',
+            background: '#dcfce7',
+            color: '#16a34a',
+            borderRadius: '6px',
+            fontSize: '12px',
+            fontWeight: '500'
+          }}>
+            ✓ Status will change to "Screening" after scheduling
+          </div>
+        )}
+        
+        {candidate.status === 'Screening' && (
+          <div style={{
+            marginTop: '8px',
+            padding: '6px 12px',
+            background: '#e0e7ff',
+            color: '#4338ca',
+            borderRadius: '6px',
+            fontSize: '12px',
+            fontWeight: '500'
+          }}>
+            ✓ Status will change to "Interview" after scheduling
+          </div>
+        )}
       </div>
 
       {/* Action Buttons */}
