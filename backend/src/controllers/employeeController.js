@@ -46,7 +46,7 @@ export const createEmployee = async (req, res) => {
         name,
         email,
         department: {
-          connect: { name: department } 
+          connect: { name: department }  
         },
         position,
         salary: parseFloat(salary),
@@ -61,5 +61,60 @@ export const createEmployee = async (req, res) => {
   } catch (err) {
     console.error('Failed to create employee:', err);
     res.status(500).json({ error: 'Failed to create employee' });
+  }
+};
+
+
+export const deleteEmployee = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.employee.delete({
+      where: { id: Number(id) }
+    });
+    res.json({ message: `Employee ${id} deleted successfully.` });
+  } catch (err) {
+    console.error("➡️ Error deleting employee:", err);
+    res.status(500).json({ error: 'Failed to delete employee' });
+  }
+};
+
+export const updateEmployee = async (req, res) => {
+  const { id } = req.params;
+  const {
+    name, email, department, position,
+    salary, status, joinDate, age, experience
+  } = req.body;
+
+  try {
+
+    const existing = await prisma.employee.findUnique({
+      where: { id: Number(id) }
+    });
+    if (!existing) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    const updatedEmployee = await prisma.employee.update({
+      where: { id: Number(id) },
+      data: {
+        name,
+        email,
+        department: {
+          connect: { name: department }  
+        },
+        position,
+        salary: parseFloat(salary),
+        status,
+        joinDate: new Date(joinDate),
+        age: parseInt(age),
+        experience: parseInt(experience)
+      },
+      include: { department: true }
+    });
+
+    res.json(updatedEmployee);
+  } catch (err) {
+    console.error('➡️ Failed to update employee:', err);
+    res.status(500).json({ error: 'Failed to update employee' });
   }
 };

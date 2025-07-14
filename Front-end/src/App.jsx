@@ -10,6 +10,10 @@ import AdminProfile from './components/AdminProfile';
 import ViewEmployee from './components/ViewEmployee';
 import LoginForm from './components/LoginForm';
 import Landing from './components/LandingPage';
+import AttendanceLogs from './Components/AttendanceLogs';
+
+
+
 
 import './App.css';
 import LandingPage from './components/LandingPage';
@@ -35,6 +39,7 @@ function App() {
               <Sidebar onLogout={handleLogout} />
               <div style={{ flex: 1, padding: '20px' }}>
                 <Routes>
+                  <Route path="/attendance-logs" element={<AttendanceLogs />} />
                   <Route path="/EmployeeList" element={<EmployeeListPage />} />
                   <Route path="/employee/:id" element={<ViewEmployee />} /> 
                   <Route path="/AdminProfile" element={<AdminProfile />} />
