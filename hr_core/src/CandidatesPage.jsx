@@ -156,21 +156,52 @@ const CandidatesPage = () => {
     alert('Candidate added successfully!');
   };
 
-  // Handle interview scheduling - NOW STORES INTERVIEW DATA
+  // Handle status changes from contact modal
+  const handleStatusChange = (candidateId, newStatus) => {
+    setCandidates(prev => 
+      prev.map(candidate => 
+        candidate.id === candidateId 
+          ? { ...candidate, status: newStatus }
+          : candidate
+      )
+    );
+  };
+
+  // Enhanced interview scheduling with automatic status changes
   const handleScheduleInterviewSave = (interviewData) => {
     // Store the interview
     const newInterview = {
       ...interviewData,
-      id: Date.now(), // Simple ID generation
+      id: Date.now(),
       createdAt: new Date().toISOString()
     };
     
     setInterviews(prev => [...prev, newInterview]);
     
-    // Update candidate status to Interview if not already
-    if (selectedCandidate && (selectedCandidate.status === 'New' || selectedCandidate.status === 'Screening')) {
-      const updatedCandidate = { ...selectedCandidate, status: 'Interview' };
+    // Determine new status based on interview type and current status
+    let newStatus = selectedCandidate.status;
+    
+    if (selectedCandidate.status === 'New') {
+      // Phone/Video from New = Screening (initial screening calls)
+      if (interviewData.type === 'phone' || interviewData.type === 'video') {
+        newStatus = 'Screening';
+      }
+    } else if (selectedCandidate.status === 'Screening') {
+      // Any interview from Screening = Interview (formal interview process)
+      newStatus = 'Interview';
+    }
+    // Interview status candidates stay as Interview for additional rounds
+    
+    // Update candidate status if changed
+    if (newStatus !== selectedCandidate.status) {
+      const updatedCandidate = { ...selectedCandidate, status: newStatus };
       handleSaveCandidate(updatedCandidate);
+      
+      // Show status change notification
+      const statusMessage = `Interview scheduled! Candidate status updated: ${selectedCandidate.status} → ${newStatus}`;
+      alert(statusMessage);
+    } else {
+      alert('Interview scheduled successfully!');
     }
     
     console.log('Interview scheduled:', newInterview);
@@ -186,7 +217,8 @@ const CandidatesPage = () => {
       'New': 'status-new',
       'Screening': 'status-screening',
       'Interview': 'status-interview',
-      'Offer': 'status-offer'
+      'Offer': 'status-offer',
+      'Rejected': 'status-rejected'
     };
     return statusClasses[status] || 'status-default';
   };
@@ -433,6 +465,7 @@ const CandidatesPage = () => {
         candidate={selectedCandidate}
         isOpen={contactModalOpen}
         onClose={() => setContactModalOpen(false)}
+        onStatusChange={handleStatusChange}
       />
       
       <ScheduleInterviewModal
