@@ -18,7 +18,10 @@ app.use(session({
   secret: 'yourSuperSecretKey',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } 
+  cookie: {
+    secure: false, 
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  }
 }));
 app.use('/api/admin', adminRoutes);
 app.use('/api/employees', employeeRoutes);
