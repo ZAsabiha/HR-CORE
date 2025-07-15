@@ -3,6 +3,7 @@ const prisma = new PrismaClient();
 import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
+import bcrypt from 'bcryptjs';
 
 import adminRoutes from './src/routes/adminRoutes.js';
 import employeeRoutes from './src/routes/employeeRoutes.js';
@@ -30,7 +31,10 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/salaries', salaryRoutes);
 app.use('/auth', express.json(), authRoutes);
 
-async function main() {
+async function main() {async function main() {
+
+   const plainAdminPassword = 'securepassword123';
+  const hashedAdminPassword = await bcrypt.hash(plainAdminPassword, 10);
 
   const designDept = await prisma.department.upsert({
     where: { name: 'Design' },
@@ -45,15 +49,16 @@ async function main() {
   });
 
 
-  const admin = await prisma.admin.upsert({
-    where: { email: 'admin@hrcore.com' },
-    update: {},
-    create: {
-      name: 'HR Admin',
-      email: 'admin@hrcore.com',
-      password: 'securepassword123'
-    }
-  });
+  
+const admin = await prisma.admin.upsert({
+  where: { email: 'admin@hrcore.com' },
+  update: { password: hashedAdminPassword },  
+  create: {
+    name: 'HR Admin',
+    email: 'admin@hrcore.com',
+    password: hashedAdminPassword,
+  }
+});
 
 
   const existingEmployees = await prisma.employee.findMany();
