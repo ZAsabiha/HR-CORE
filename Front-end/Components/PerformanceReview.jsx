@@ -1,63 +1,152 @@
 
-import React, { useState } from 'react';
-import './PerformanceReview.css';
-import { User, Star, MessageCircle, Calendar, PlusCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import './EmployeeGoals.css';
 
-const PerformanceReview = () => {
-  const [reviews, setReviews] = useState([
-    {
-      id: "EMP001",
-      name: "Zannatul Sabiha",
-      department: "Engineering",
-      rating: 4.5,
-      feedback: "Consistently meets deadlines and delivers high-quality work.",
-      reviewDate: "2025-06-01"
-    },
-    {
-      id: "EMP002",
-      name: "Aarav Rahman",
-      department: "HR",
-      rating: 3.8,
-      feedback: "Strong communication skills but needs to improve task management.",
-      reviewDate: "2025-06-10"
-    }
-  ]);
+const EmployeeGoals = () => {
+  const [goals, setGoals] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newGoal, setNewGoal] = useState({
+    employeeId: '',
+    goalTitle: '',
+    targetDate: '',
+    status: 'Not Started',
+    progress: 0,
+  });
 
-  const handleAddReview = () => {
-   
-    const newReview = {
-      id: `EMP00${reviews.length + 1}`,
-      name: "New Employee",
-      department: "New Department",
-      rating: 4.0,
-      feedback: "New review added.",
-      reviewDate: new Date().toISOString().split('T')[0]
-    };
-    setReviews([...reviews, newReview]);
-  };
+  useEffect(() => {
+    fetch('/api/employee-goals')
+      .then(res => res.json())
+      .then(data => setGoals(data));
 
+    fetch('/api/employees') 
+      .then(res => res.json())
+      .then(data => setEmployees(data));
+  }, []);
+
+
+const handleAddGoal = () => {
+  if (newGoal.employeeId && newGoal.goalTitle && newGoal.targetDate) {
+    fetch('/api/employee-goals', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newGoal),
+    })
+      .then(res => res.json())
+      .then(() => {
+    
+        fetch('/api/employee-goals')
+          .then(res => res.json())
+          .then(data => setGoals(data));
+
+        setNewGoal({
+          employeeId: '',
+          goalTitle: '',
+          targetDate: '',
+          status: 'Not Started',
+          progress: 0,
+        });
+        setShowAddForm(false);
+      });
+  }
+};
   return (
-    <div className="review-container">
-      <div className="review-header">
-        <h2 className="review-title">Employee Performance Reviews</h2>
-        <button className="add-review-btn" onClick={handleAddReview}>
-          <PlusCircle size={18} /> Add Review
+    <div className="goals-container">
+      <h2 className="goals-title">Employee Goals</h2>
+
+      <div style={{ marginBottom: '20px' }}>
+        <button onClick={() => setShowAddForm(true)} className="add-goal-btn">
+          Add Goal
         </button>
       </div>
-      
-      <div className="review-list">
-        {reviews.map((review) => (
-          <div key={review.id} className="review-card">
-            <div className="review-row"><User className="icon" size={16} /> <span className="label">Name:</span> {review.name}</div>
-            <div className="review-row"><span className="label">Department:</span> {review.department}</div>
-            <div className="review-row"><Star className="icon" size={16} /> <span className="label">Rating:</span> ⭐ {review.rating}</div>
-            <div className="review-row"><MessageCircle className="icon" size={16} /> <span className="label">Feedback:</span> {review.feedback}</div>
-            <div className="review-row"><Calendar className="icon" size={16} /> <span className="label">Date:</span> {review.reviewDate}</div>
-          </div>
-        ))}
+
+      {showAddForm && (
+        <div className="add-goal-form">
+          <select
+            value={newGoal.employeeId}
+            onChange={e => setNewGoal({ ...newGoal, employeeId: e.target.value })}
+          >
+            <option value="">Select Employee</option>
+            {employees.map(emp => (
+              <option key={emp.id} value={emp.id}>
+                {emp.name}
+              </option>
+            ))}
+          </select>
+
+          <input
+            type="text"
+            placeholder="Goal Title"
+            value={newGoal.goalTitle}
+            onChange={e => setNewGoal({ ...newGoal, goalTitle: e.target.value })}
+          />
+
+          <input
+            type="date"
+            value={newGoal.targetDate}
+            onChange={e => setNewGoal({ ...newGoal, targetDate: e.target.value })}
+          />
+
+          <select
+            value={newGoal.status}
+            onChange={e => setNewGoal({ ...newGoal, status: e.target.value })}
+          >
+            <option value="Not Started">Not Started</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+
+          <input
+            type="number"
+            value={newGoal.progress}
+            onChange={e => setNewGoal({ ...newGoal, progress: e.target.value })}
+            placeholder="Progress %"
+            min="0"
+            max="100"
+          />
+
+          <button onClick={handleAddGoal}>Submit</button>
+          <button onClick={() => setShowAddForm(false)}>Cancel</button>
+        </div>
+      )}
+
+      <div className="goals-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee Name</th>
+              <th>Department</th>
+              <th>Goal</th>
+              <th>Target Date</th>
+              <th>Status</th>
+              <th>Progress</th>
+            </tr>
+          </thead>
+          <tbody>
+            {goals.length === 0 ? (
+              <tr>
+                <td colSpan="6" style={{ textAlign: 'center' }}>
+                  No goals available.
+                </td>
+              </tr>
+            ) : (
+              goals.map((goal, index) => (
+                <tr key={goal.id || index}>
+                  <td>{goal.employee?.name}</td>
+                  <td>{goal.employee?.department?.name}</td>
+                  <td>{goal.goalTitle}</td>
+            <td>{goal.deadline ? new Date(goal.deadline).toLocaleDateString() : 'N/A'}</td>
+
+                  <td>{goal.status}</td>
+                  <td>{goal.progress}%</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 };
 
-export default PerformanceReview;
+export default EmployeeGoals;
