@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Download, Calendar, Filter, Clock, Users, TrendingUp, DollarSign, Menu, ChevronDown } from 'lucide-react';
-import Sidebar from './Sidebar';
+import { Search, Download, Clock, Users, TrendingUp, DollarSign, MapPin } from 'lucide-react';
 import './OvertimePay.css';
 
 const OvertimePay = () => {
@@ -8,19 +7,14 @@ const OvertimePay = () => {
   const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [dateRange, setDateRange] = useState('today');
-  const [topSearchTerm, setTopSearchTerm] = useState('');
-
-  const handleLogout = () => {
-    console.log('Logout clicked');
-  };
 
   const overtimeData = [
     {
       id: 1,
       employeeId: 'EMP001',
-      name: 'Sarah Johnson',
+      name: 'Zannatul Adon Sabiha',
       department: 'Engineering',
-      avatar: 'SJ',
+      avatar: 'ZS',
       clockIn: '09:00 AM',
       clockOut: '07:30 PM',
       regularHours: 8,
@@ -34,9 +28,9 @@ const OvertimePay = () => {
     {
       id: 2,
       employeeId: 'EMP002',
-      name: 'Michael Chen',
+      name: 'Israt Risha Ivey',
       department: 'Marketing',
-      avatar: 'MC',
+      avatar: 'IR',
       clockIn: '09:15 AM',
       clockOut: '08:45 PM',
       regularHours: 8,
@@ -50,9 +44,9 @@ const OvertimePay = () => {
     {
       id: 3,
       employeeId: 'EMP003',
-      name: 'Emily Rodriguez',
+      name: 'Sanjana Afreen',
       department: 'HR',
-      avatar: 'ER',
+      avatar: 'SA',
       clockIn: '08:45 AM',
       clockOut: '06:30 PM',
       regularHours: 8,
@@ -66,9 +60,9 @@ const OvertimePay = () => {
     {
       id: 4,
       employeeId: 'EMP004',
-      name: 'David Kim',
+      name: 'Ridika Naznin',
       department: 'Engineering',
-      avatar: 'DK',
+      avatar: 'RN',
       clockIn: '08:30 AM',
       clockOut: '09:15 PM',
       regularHours: 8,
@@ -82,9 +76,9 @@ const OvertimePay = () => {
     {
       id: 5,
       employeeId: 'EMP005',
-      name: 'Lisa Wang',
+      name: 'Ayesha Binte Anis',
       department: 'Finance',
-      avatar: 'LW',
+      avatar: 'AB',
       clockIn: '09:05 AM',
       clockOut: '07:00 PM',
       regularHours: 8,
@@ -98,9 +92,9 @@ const OvertimePay = () => {
     {
       id: 6,
       employeeId: 'EMP006',
-      name: 'James Wilson',
+      name: 'Afridah Zarin Khan',
       department: 'Sales',
-      avatar: 'JW',
+      avatar: 'AZ',
       clockIn: '08:30 AM',
       clockOut: '08:15 PM',
       regularHours: 8,
@@ -114,7 +108,6 @@ const OvertimePay = () => {
   ];
 
   const departments = ['all', 'Engineering', 'Marketing', 'HR', 'Finance', 'Sales'];
-  const statuses = ['all', 'eligible', 'not_eligible'];
 
   const filteredData = useMemo(() => {
     return overtimeData.filter(record => {
@@ -127,7 +120,7 @@ const OvertimePay = () => {
       
       return matchesSearch && matchesDepartment && matchesStatus;
     });
-  }, [searchTerm, selectedDepartment, selectedStatus, overtimeData]);
+  }, [searchTerm, selectedDepartment, selectedStatus]);
 
   const stats = useMemo(() => {
     const totalEmployees = filteredData.length;
@@ -153,34 +146,15 @@ const OvertimePay = () => {
     return (regularHours * hourlyRate).toFixed(2);
   };
 
-  const getOvertimeStatus = (overtimeHours) => {
-    if (overtimeHours > 4) return 'high';
-    if (overtimeHours > 2) return 'medium';
-    if (overtimeHours > 0) return 'low';
-    return 'none';
-  };
-
   const getStatusBadge = (overtimeHours) => {
-    const status = getOvertimeStatus(overtimeHours);
-    const statusClasses = {
-      high: 'status-high',
-      medium: 'status-medium',
-      low: 'status-low',
-      none: 'status-none'
-    };
-
-    const statusLabels = {
-      high: 'High OT',
-      medium: 'Medium OT',
-      low: 'Low OT',
-      none: 'No OT'
-    };
-
-    return (
-      <span className={`status-badge ${statusClasses[status]}`}>
-        {statusLabels[status]}
-      </span>
-    );
+    if (overtimeHours > 3) {
+      return <span className="status-badge status-high">High OT</span>;
+    } else if (overtimeHours > 1) {
+      return <span className="status-badge status-medium">Medium OT</span>;
+    } else if (overtimeHours > 0) {
+      return <span className="status-badge status-low">Low OT</span>;
+    }
+    return <span className="status-badge status-none">No OT</span>;
   };
 
   const handleExport = () => {
@@ -188,111 +162,83 @@ const OvertimePay = () => {
   };
 
   return (
-    <div className="overtime-layout">
-      <Sidebar onLogout={handleLogout} />
-      <div className="overtime-main-content">
-        {/* Top Navigation Header */}
-        <div className="top-navigation">
-          <div className="nav-left">
-            <Menu className="menu-icon" />
-            <div className="employee-dropdown">
-              <Users className="dropdown-icon" />
-              <span className="dropdown-text">All Employees</span>
-              <ChevronDown className="dropdown-arrow" />
-            </div>
-            <div className="top-search-box">
-              <Search className="top-search-icon" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="top-search-input"
-                value={topSearchTerm}
-                onChange={(e) => setTopSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="nav-right">
-            <a href="#" className="nav-link">Home</a>
-            <a href="#" className="nav-link">About</a>
-            <a href="#" className="nav-link">Contacts</a>
-            <a href="#" className="nav-link">Login</a>
-          </div>
-        </div>
-
-        {/* Page Title */}
+    <div className="overtime-container">
+      <div className="overtime-wrapper">
+        {/* Page Header */}
         <div className="page-header">
           <h1 className="page-title">Overtime Pay</h1>
+          <p className="page-subtitle">Manage and track employee overtime hours and compensation</p>
         </div>
 
-        <div className="overtime-container">
-          {/* Stats Cards */}
-          <div className="stats-grid">
-            <div className="stat-card stat-blue">
-              <div className="stat-content">
-                <div className="stat-info">
-                  <Users className="stat-icon-main" />
-                  <div className="stat-details">
-                    <p className="stat-title">Total Employees</p>
-                    <p className="stat-value">{stats.totalEmployees}</p>
-                  </div>
-                </div>
+        {/* Stats Cards */}
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-content">
+              <div className="stat-info">
+                <p className="stat-label">Total Employees</p>
+                <p className="stat-value">{stats.totalEmployees}</p>
               </div>
-            </div>
-
-            <div className="stat-card stat-green">
-              <div className="stat-content">
-                <div className="stat-info">
-                  <Clock className="stat-icon-main" />
-                  <div className="stat-details">
-                    <p className="stat-title">Eligible for OT</p>
-                    <p className="stat-value">{stats.eligibleForOvertime}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="stat-card stat-yellow">
-              <div className="stat-content">
-                <div className="stat-info">
-                  <TrendingUp className="stat-icon-main" />
-                  <div className="stat-details">
-                    <p className="stat-title">Total OT Hours</p>
-                    <p className="stat-value">{stats.totalOvertimeHours}h</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="stat-card stat-red">
-              <div className="stat-content">
-                <div className="stat-info">
-                  <DollarSign className="stat-icon-main" />
-                  <div className="stat-details">
-                    <p className="stat-title">Total OT Pay</p>
-                    <p className="stat-value">${stats.totalOvertimePay}</p>
-                  </div>
-                </div>
+              <div className="stat-icon stat-icon-blue">
+                <Users size={24} />
               </div>
             </div>
           </div>
 
-          {/* Filters and Controls */}
-          <div className="filters-container">
-            <div className="filters-row">
-              <div className="search-filters">
-                {/* Search */}
-                <div className="search-box">
-                  <Search className="search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Search employees..."
-                    className="search-input"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
+          <div className="stat-card">
+            <div className="stat-content">
+              <div className="stat-info">
+                <p className="stat-label">Eligible for OT</p>
+                <p className="stat-value">{stats.eligibleForOvertime}</p>
+              </div>
+              <div className="stat-icon stat-icon-green">
+                <Clock size={24} />
+              </div>
+            </div>
+          </div>
 
-                {/* Date Range */}
+          <div className="stat-card">
+            <div className="stat-content">
+              <div className="stat-info">
+                <p className="stat-label">Total OT Hours</p>
+                <p className="stat-value">{stats.totalOvertimeHours}h</p>
+              </div>
+              <div className="stat-icon stat-icon-orange">
+                <TrendingUp size={24} />
+              </div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-content">
+              <div className="stat-info">
+                <p className="stat-label">Total OT Pay</p>
+                <p className="stat-value">${stats.totalOvertimePay}</p>
+              </div>
+              <div className="stat-icon stat-icon-purple">
+                <DollarSign size={24} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="filters-container">
+          <div className="filters-wrapper">
+            <div className="filters-left">
+              {/* Search */}
+              <div className="search-container">
+                <Search className="search-icon" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search employees..."
+                  className="search-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              {/* Filter Selects */}
+              <div className="filter-selects">
                 <select 
                   className="filter-select"
                   value={dateRange}
@@ -305,7 +251,6 @@ const OvertimePay = () => {
                   <option value="this_month">This Month</option>
                 </select>
 
-                {/* Department Filter */}
                 <select 
                   className="filter-select"
                   value={selectedDepartment}
@@ -318,7 +263,6 @@ const OvertimePay = () => {
                   ))}
                 </select>
 
-                {/* Status Filter */}
                 <select 
                   className="filter-select"
                   value={selectedStatus}
@@ -329,89 +273,105 @@ const OvertimePay = () => {
                   <option value="not_eligible">Not Eligible</option>
                 </select>
               </div>
-
-              {/* Export Button */}
-              <button onClick={handleExport} className="export-btn">
-                <Download className="btn-icon" />
-                Export
-              </button>
             </div>
-          </div>
 
-          {/* Overtime Table */}
-          <div className="overtime-table-container">
-            <div className="table-wrapper">
-              <table className="overtime-table">
-                <thead className="table-header">
-                  <tr>
-                    <th className="table-th">Employee</th>
-                    <th className="table-th">Clock In</th>
-                    <th className="table-th">Clock Out</th>
-                    <th className="table-th">Regular Hours</th>
-                    <th className="table-th">OT Hours</th>
-                    <th className="table-th">Regular Pay</th>
-                    <th className="table-th">OT Pay</th>
-                    <th className="table-th">Status</th>
-                    <th className="table-th">Location</th>
-                  </tr>
-                </thead>
-                <tbody className="table-body">
-                  {filteredData.map((record) => (
-                    <tr key={record.id} className="table-row">
-                      <td className="table-td">
-                        <div className="employee-info">
-                          <div className="employee-avatar">
-                            <span className="avatar-text">{record.avatar}</span>
-                          </div>
-                          <div className="employee-details">
-                            <div className="employee-name">{record.name}</div>
-                            <div className="employee-meta">{record.employeeId} • {record.department}</div>
-                          </div>
+            {/* Export Button */}
+            <button onClick={handleExport} className="export-btn">
+              <Download size={16} />
+              Export
+            </button>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="table-container">
+          <div className="table-wrapper">
+            <table className="overtime-table">
+              <thead className="table-header">
+                <tr>
+                  <th className="table-th">Employee</th>
+                  <th className="table-th">Clock In</th>
+                  <th className="table-th">Clock Out</th>
+                  <th className="table-th">Regular Hours</th>
+                  <th className="table-th">OT Hours</th>
+                  <th className="table-th">Regular Pay</th>
+                  <th className="table-th">OT Pay</th>
+                  <th className="table-th">Status</th>
+                  <th className="table-th">Location</th>
+                </tr>
+              </thead>
+              <tbody className="table-body">
+                {filteredData.map((record) => (
+                  <tr key={record.id} className="table-row">
+                    <td className="table-td">
+                      <div className="employee-info">
+                        <div className="employee-avatar">
+                          <span className="avatar-text">{record.avatar}</span>
                         </div>
-                      </td>
-                      <td className="table-td table-time">{record.clockIn}</td>
-                      <td className="table-td table-time">{record.clockOut}</td>
-                      <td className="table-td table-hours">{record.regularHours}h</td>
-                      <td className="table-td table-overtime">{record.overtimeHours}h</td>
-                      <td className="table-td table-pay">${calculateRegularPay(record.regularHours, record.hourlyRate)}</td>
-                      <td className="table-td table-overtime-pay">${calculateOvertimePay(record.overtimeHours, record.hourlyRate)}</td>
-                      <td className="table-td">{getStatusBadge(record.overtimeHours)}</td>
-                      <td className="table-td table-location">{record.location}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {filteredData.length === 0 && (
-              <div className="empty-state">
-                <div className="empty-title">No overtime records found</div>
-                <div className="empty-subtitle">Try adjusting your search or filter criteria</div>
-              </div>
-            )}
+                        <div className="employee-details">
+                          <div className="employee-name">{record.name}</div>
+                          <div className="employee-meta">{record.employeeId} • {record.department}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="table-td table-time">{record.clockIn}</td>
+                    <td className="table-td table-time">{record.clockOut}</td>
+                    <td className="table-td table-hours">{record.regularHours}h</td>
+                    <td className="table-td">
+                      <span className={`overtime-hours ${record.overtimeHours > 0 ? 'has-overtime' : 'no-overtime'}`}>
+                        {record.overtimeHours}h
+                      </span>
+                    </td>
+                    <td className="table-td table-pay">${calculateRegularPay(record.regularHours, record.hourlyRate)}</td>
+                    <td className="table-td">
+                      <span className={`overtime-pay ${record.overtimeHours > 0 ? 'has-overtime' : 'no-overtime'}`}>
+                        ${calculateOvertimePay(record.overtimeHours, record.hourlyRate)}
+                      </span>
+                    </td>
+                    <td className="table-td">{getStatusBadge(record.overtimeHours)}</td>
+                    <td className="table-td">
+                      <div className="location-info">
+                        <MapPin size={16} />
+                        <span>{record.location}</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
-          {/* Pagination */}
-          {filteredData.length > 0 && (
-            <div className="pagination-container">
-              <div className="pagination-info">
-                Showing <span className="pagination-highlight">1</span> to <span className="pagination-highlight">{filteredData.length}</span> of{' '}
-                <span className="pagination-highlight">{filteredData.length}</span> results
+          {filteredData.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-icon">
+                <Search size={48} />
               </div>
-              <div className="pagination-controls">
-                <button className="pagination-btn pagination-btn-disabled" disabled>
-                  Previous
-                </button>
-                <button className="pagination-btn pagination-btn-active">
-                  1
-                </button>
-                <button className="pagination-btn pagination-btn-disabled" disabled>
-                  Next
-                </button>
-              </div>
+              <h3 className="empty-title">No overtime records found</h3>
+              <p className="empty-description">Try adjusting your search or filter criteria</p>
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {filteredData.length > 0 && (
+          <div className="pagination-container">
+            <div className="pagination-info">
+              Showing <span className="pagination-highlight">1</span> to <span className="pagination-highlight">{filteredData.length}</span> of{' '}
+              <span className="pagination-highlight">{filteredData.length}</span> results
+            </div>
+            <div className="pagination-controls">
+              <button className="pagination-btn pagination-btn-disabled" disabled>
+                Previous
+              </button>
+              <button className="pagination-btn pagination-btn-active">
+                1
+              </button>
+              <button className="pagination-btn pagination-btn-disabled" disabled>
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
