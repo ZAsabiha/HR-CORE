@@ -1,0 +1,257 @@
+/* .goals-container {
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 32px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(40px);
+    transform: translateX(115px); 
+}
+
+.goals-title {
+  font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 24px;
+  color: #276f82;
+}
+
+.goals-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.goals-table th,
+.goals-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  font-size: 16px;
+}
+
+.goals-table th {
+  background-color: #f1f5f9;
+  color: #333;
+}
+
+.status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  display: inline-block;
+}
+
+.status.in-progress {
+  background-color: #f0ad4e;
+}
+
+.status.not-started {
+  background-color: #d9534f;
+}
+
+.status.completed {
+  background-color: #5cb85c;
+}
+
+.progress-bar-wrapper {
+  background-color: #e9ecef;
+  border-radius: 10px;
+  height: 20px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background-color: #276f82;
+  height: 100%;
+  width: 0%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  transition: width 0.4s ease;
+}
+
+.progress-text {
+  padding: 0 8px;
+}
+.add-goal-btn {
+  background-color: #2563eb;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.add-goal-form {
+  background-color: #f9fafb;
+  padding: 20px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.add-goal-form input {
+  display: block;
+  margin-bottom: 10px;
+  padding: 8px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.form-actions button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-actions button:first-child {
+  background-color: #2563eb;
+  color: white;
+}
+
+.form-actions button:last-child {
+  background-color: #e5e7eb;
+  color: #374151;
+} */
+.goals-container {
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 32px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.goals-title {
+  font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 24px;
+  color: #276f82;
+}
+
+.goals-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.goals-table th,
+.goals-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  font-size: 16px;
+}
+
+.goals-table th {
+  background-color: #f1f5f9;
+  color: #333;
+}
+
+.status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  display: inline-block;
+}
+
+.status.in-progress {
+  background-color: #f0ad4e;
+}
+
+.status.not-started {
+  background-color: #d9534f;
+}
+
+.status.completed {
+  background-color: #5cb85c;
+}
+
+.progress-bar-wrapper {
+  background-color: #e9ecef;
+  border-radius: 10px;
+  height: 20px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background-color: #276f82;
+  height: 100%;
+  width: 0%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  transition: width 0.4s ease;
+}
+
+.progress-text {
+  padding: 0 8px;
+}
+
+.add-goal-btn {
+  background-color: #276f82;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.add-goal-form {
+  background-color: #f9fafb;
+  padding: 20px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.add-goal-form input {
+  display: block;
+  margin-bottom: 10px;
+  padding: 8px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.form-actions button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-actions button:first-child {
+  background-color: #374151;
+  color: white;
+}
+
+.form-actions button:last-child {
+  background-color: #e5e7eb;
+  color: #374151;
+}
