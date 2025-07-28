@@ -67,7 +67,8 @@ model Employee {
   recruitments  Recruitment[]
   salaries      Salary[]
   performanceReviews PerformanceReview[]
-
+ attendanceLogs AttendanceLog[]
+ 
   @@index([departmentId])
 }
 
@@ -160,4 +161,41 @@ model PerformanceReview {
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@index([employeeId])
+}
+
+model QRLocation {
+  id          Int      @id @default(autoincrement())
+  name        String   // "Main Entrance", "Break Room", "Exit"
+  type        String   // "entrance", "break_room", "exit"
+  isActive    Boolean  @default(true)
+  currentCode String   @unique // Current QR code string
+  lastUpdated DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  attendanceLogs AttendanceLog[]
+}
+
+
+model AttendanceLog {
+  id          Int      @id @default(autoincrement())
+  employeeId  Int
+  locationId  Int
+  type        String   // "check_in", "check_out", "break_out", "break_in"
+  timestamp   DateTime @default(now())
+  gpsLocation String?  // JSON string with lat/lng
+  ipAddress   String?
+  deviceInfo  String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  employee    Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  location    QRLocation @relation(fields: [locationId], references: [id])
+  
+  @@index([employeeId])
+  @@index([locationId])
+  @@index([timestamp])
 }
