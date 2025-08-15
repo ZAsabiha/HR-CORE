@@ -1,11 +1,22 @@
 import express from 'express';
-import { downloadReportsCSV, downloadReportsPDF,getAllReports } from '../controllers/reportingController.js';
+import {
+  getReports,
+  getReportById,
+  downloadReport,
+  generateReport
+} from '../controllers/reportingController.js';
 
 const router = express.Router();
-router.get('/', getAllReports);
 
-router.get('/:reportId/download/csv', downloadReportsCSV);
 
-router.get('/:reportId/download/pdf', downloadReportsPDF);
+router.get('/', getReports);
+
+router.get('/:id', getReportById);
+
+
+router.get('/:id/download/:format', downloadReport);
+
+
+router.post('/generate', generateReport);
 
 export default router;
