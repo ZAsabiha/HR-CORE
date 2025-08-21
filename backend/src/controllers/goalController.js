@@ -39,11 +39,18 @@ export const getEmployeeGoals = async (req, res) => {
   }
 };
 
-// POST a new goal
+// POST a new goal (ADMIN and TEAM_LEAD only)
 export const createGoal = async (req, res) => {
   const { employeeId, goalTitle, deadline, status, progress, priority, description, name } = req.body;
 
   try {
+    // Validate required fields
+    if (!employeeId || !goalTitle || !deadline) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: employeeId, goalTitle, and deadline are required' 
+      });
+    }
+
     const employeeIdInt = Number(employeeId);
     if (!Number.isInteger(employeeIdInt)) {
       return res.status(400).json({ error: 'Invalid employeeId format' });
@@ -76,14 +83,28 @@ export const createGoal = async (req, res) => {
   }
 };
 
-// UPDATE a goal
+// UPDATE a goal (ADMIN and TEAM_LEAD only)
 export const updateGoal = async (req, res) => {
   const { id } = req.params;
   const { goalTitle, deadline, status, progress, priority, description, name } = req.body;
 
   try {
+    // Validate goal ID
+    const goalId = Number(id);
+    if (!Number.isInteger(goalId)) {
+      return res.status(400).json({ error: 'Invalid goal ID format' });
+    }
+
+    // Check if goal exists
+    const existingGoal = await prisma.goal.findUnique({
+      where: { id: goalId }
+    });
+    if (!existingGoal) {
+      return res.status(404).json({ error: 'Goal not found' });
+    }
+
     const updatedGoal = await prisma.goal.update({
-      where: { id: Number(id) },
+      where: { id: goalId },
       data: {
         ...(goalTitle !== undefined && { goalTitle }),
         ...(description !== undefined && { description }),
@@ -106,12 +127,26 @@ export const updateGoal = async (req, res) => {
   }
 };
 
-// DELETE a goal
+// DELETE a goal (ADMIN and TEAM_LEAD only)
 export const deleteGoal = async (req, res) => {
   const { id } = req.params;
 
   try {
-    await prisma.goal.delete({ where: { id: Number(id) } });
+    // Validate goal ID
+    const goalId = Number(id);
+    if (!Number.isInteger(goalId)) {
+      return res.status(400).json({ error: 'Invalid goal ID format' });
+    }
+
+    // Check if goal exists before attempting to delete
+    const existingGoal = await prisma.goal.findUnique({
+      where: { id: goalId }
+    });
+    if (!existingGoal) {
+      return res.status(404).json({ error: 'Goal not found' });
+    }
+
+    await prisma.goal.delete({ where: { id: goalId } });
     res.json({ message: 'Goal deleted successfully' });
   } catch (err) {
     if (err.code === 'P2025') {
@@ -122,31 +157,51 @@ export const deleteGoal = async (req, res) => {
   }
 };
 
-// BULK actions (complete, delete, in-progress)
+// BULK actions (complete, delete, in-progress) - ADMIN and TEAM_LEAD only
 export const bulkAction = async (req, res) => {
   const { goalIds, action } = req.body;
 
   try {
+    // Validate input
     if (!Array.isArray(goalIds) || goalIds.length === 0) {
       return res.status(400).json({ error: 'No goals selected' });
     }
 
+    if (!action || !['complete', 'delete', 'in-progress'].includes(action)) {
+      return res.status(400).json({ error: 'Invalid or missing action. Valid actions: complete, delete, in-progress' });
+    }
+
     const ids = goalIds.map(Number).filter(Number.isInteger);
-    if (ids.length === 0) return res.status(400).json({ error: 'Invalid goal IDs' });
+    if (ids.length === 0) {
+      return res.status(400).json({ error: 'Invalid goal IDs' });
+    }
+
+    // Check if goals exist before performing bulk action
+    const existingGoals = await prisma.goal.findMany({
+      where: { id: { in: ids } },
+      select: { id: true }
+    });
+    
+    if (existingGoals.length === 0) {
+      return res.status(404).json({ error: 'No valid goals found for the provided IDs' });
+    }
+
+    const existingIds = existingGoals.map(g => g.id);
+    let result;
 
     switch (action) {
       case 'complete':
-        await prisma.goal.updateMany({
-          where: { id: { in: ids } },
+        result = await prisma.goal.updateMany({
+          where: { id: { in: existingIds } },
           data: { status: 'Completed', progress: 100 }
         });
         break;
       case 'delete':
-        await prisma.goal.deleteMany({ where: { id: { in: ids } } });
+        result = await prisma.goal.deleteMany({ where: { id: { in: existingIds } } });
         break;
       case 'in-progress':
-        await prisma.goal.updateMany({
-          where: { id: { in: ids } },
+        result = await prisma.goal.updateMany({
+          where: { id: { in: existingIds } },
           data: { status: 'In Progress' }
         });
         break;
@@ -154,10 +209,16 @@ export const bulkAction = async (req, res) => {
         return res.status(400).json({ error: 'Invalid action' });
     }
 
-    res.json({ message: `Bulk ${action} completed successfully`, affectedGoals: ids.length });
+    res.json({ 
+      message: `Bulk ${action} completed successfully`, 
+      affectedGoals: result.count,
+      requestedGoals: ids.length,
+      ...(existingIds.length !== ids.length && { 
+        warning: `${ids.length - existingIds.length} goal(s) not found and were skipped` 
+      })
+    });
   } catch (err) {
     console.error('Error performing bulk action:', err);
     res.status(500).json({ error: 'Failed to perform bulk action' });
   }
 };
-
