@@ -1,4 +1,3 @@
-
 .goals-container {
   padding: 20px;
   max-width: 1400px;
@@ -430,10 +429,4 @@ input[type="checkbox"] {
 
 .goals-table tr {
   animation: fadeIn 0.3s ease-out;
-}
-
-.form-actions button:last-child {
-  background-color: #e5e7eb;
-  color: #374151;
-
 }
