@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -6,7 +7,6 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
-
 
 model Admin {
   id        Int         @id @default(autoincrement())
@@ -30,14 +30,6 @@ model Attendance {
   @@index([employeeId])
 }
 
-
-// model Department {
-//   id        Int        @id @default(autoincrement())
-//   name      String
-//   createdAt DateTime   @default(now())
-//   updatedAt DateTime   @updatedAt
-//   employees Employee[]
-// }
 model Department {
   id        Int        @id @default(autoincrement())
   name      String     @unique
@@ -46,11 +38,35 @@ model Department {
   employees Employee[]
 }
 
+// model Employee {
+//   id            Int            @id @default(autoincrement())
+//   name          String
+//   email         String         @unique
+//   salary        Float
+//   departmentId  Int
+//   position      String
+//   status        String
+//   joinDate      DateTime
+//   age           Int
+//   experience    Int
+//   role          Role           @default(EMPLOYEE)  // ← Added role field
+//   createdAt     DateTime       @default(now())
+//   updatedAt     DateTime       @updatedAt
+//   attendances   Attendance[]
+//   department    Department     @relation(fields: [departmentId], references: [id])
+//   goals         Goal[]
+//   leaveRequests LeaveRequest[]
+//   recruitments  Recruitment[]
+//   salaries      Salary[]
+//   performanceReviews PerformanceReview[]
 
+//   @@index([departmentId])
+// }
 model Employee {
   id            Int            @id @default(autoincrement())
   name          String
   email         String         @unique
+  password      String?        // ← Add this password field (optional for existing records)
   salary        Float
   departmentId  Int
   position      String
@@ -58,6 +74,7 @@ model Employee {
   joinDate      DateTime
   age           Int
   experience    Int
+  role          Role           @default(EMPLOYEE)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   attendances   Attendance[]
@@ -67,8 +84,7 @@ model Employee {
   recruitments  Recruitment[]
   salaries      Salary[]
   performanceReviews PerformanceReview[]
- attendanceLogs AttendanceLog[]
- 
+
   @@index([departmentId])
 }
 
@@ -81,19 +97,19 @@ model Goal {
   deadline    DateTime
   status      String   @default("Not Started")
   progress    Int      @default(0)
+  priority    String   @default("Medium") // ← already added
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  @@index([employeeId])
 }
 
-
 model HRSystem {
-  id        Int      @id @default(autoincrement())
-  status    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  status      String
+  lastUpdated DateTime
+  version     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model LeaveRequest {
@@ -102,11 +118,12 @@ model LeaveRequest {
   startDate  DateTime
   endDate    DateTime
   status     String
+  leaveType  String   // ← already added
+  reason     String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-  @@index([employeeId])
+  employee   Employee @relation(fields: [employeeId], references: [id])
 }
 
 model Recruitment {
@@ -114,6 +131,7 @@ model Recruitment {
   type        String
   employeeId  Int
   date        DateTime
+  status      String 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
@@ -122,18 +140,20 @@ model Recruitment {
 }
 
 model Reporting {
-  id            Int      @id @default(autoincrement())
+  id            String   @id
+  name          String
   type          String
-  adminId       Int
+  date          DateTime
+  status        String
+  size          String
+  downloads     Int
   generatedDate DateTime
-  content       String
+  content       Json
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  adminId       Int
   admin         Admin    @relation(fields: [adminId], references: [id])
-
-  @@index([adminId])
 }
-
 
 model Salary {
   id            Int      @id @default(autoincrement())
@@ -151,51 +171,22 @@ model Salary {
 }
 
 model PerformanceReview {
-  id         Int      @id @default(autoincrement())
-  employeeId Int
-  rating     Float
-  feedback   String
-  reviewDate DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  id           Int      @id @default(autoincrement())
+  employeeId   Int
+  rating       Float
+  feedback     String
+  reviewDate   DateTime
+  reviewPeriod String
+  goals        String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@index([employeeId])
 }
 
-model QRLocation {
-  id          Int      @id @default(autoincrement())
-  name        String   // "Main Entrance", "Break Room", "Exit"
-  type        String   // "entrance", "break_room", "exit"
-  isActive    Boolean  @default(true)
-  currentCode String   @unique // Current QR code string
-  lastUpdated DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  attendanceLogs AttendanceLog[]
-}
-
-
-model AttendanceLog {
-  id          Int      @id @default(autoincrement())
-  employeeId  Int
-  locationId  Int
-  type        String   // "check_in", "check_out", "break_out", "break_in"
-  timestamp   DateTime @default(now())
-  gpsLocation String?  // JSON string with lat/lng
-  ipAddress   String?
-  deviceInfo  String?
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  employee    Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  location    QRLocation @relation(fields: [locationId], references: [id])
-  
-  @@index([employeeId])
-  @@index([locationId])
-  @@index([timestamp])
+enum Role {
+  ADMIN
+  TEAM_LEAD
+  EMPLOYEE
 }
