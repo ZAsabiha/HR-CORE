@@ -92,7 +92,7 @@ export const updateEmployee = async (req, res) => {
   } = req.body;
 
   try {
-
+    // check if employee exists (optional but good)
     const existing = await prisma.employee.findUnique({
       where: { id: Number(id) }
     });
@@ -136,7 +136,7 @@ export const searchEmployees = async (req, res) => {
     const idSearch = Number(name);
     const idFilter = !isNaN(idSearch) ? idSearch : undefined;
 
- 
+    // Check if name can be parsed as a date
     const dateFilter = !isNaN(Date.parse(name)) ? new Date(name) : undefined;
 
     const employees = await prisma.employee.findMany({
@@ -158,3 +158,4 @@ export const searchEmployees = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 };
+
