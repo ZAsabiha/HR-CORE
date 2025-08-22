@@ -1,3 +1,173 @@
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "mysql"
+//   url      = env("DATABASE_URL")
+// }
+
+
+// model Admin {
+//   id        Int         @id @default(autoincrement())
+//   name      String
+//   email     String      @unique
+//   password  String
+//   createdAt DateTime    @default(now())
+//   updatedAt DateTime    @updatedAt
+//   reportings Reporting[]
+// }
+
+// model Attendance {
+//   id           Int      @id @default(autoincrement())
+//   employeeId   Int
+//   checkInTime  DateTime
+//   checkOutTime DateTime?
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @updatedAt
+//   employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+//   @@index([employeeId])
+// }
+
+
+// model Department {
+//   id        Int        @id @default(autoincrement())
+//   name      String     @unique
+//   createdAt DateTime   @default(now())
+//   updatedAt DateTime   @updatedAt
+//   employees Employee[]
+// }
+
+
+// model Employee {
+//   id            Int            @id @default(autoincrement())
+//   name          String
+//   email         String         @unique
+//   salary        Float
+//   departmentId  Int
+//   position      String
+//   status        String
+//   joinDate      DateTime
+//   age           Int
+//   experience    Int
+//   createdAt     DateTime       @default(now())
+//   updatedAt     DateTime       @updatedAt
+//   attendances   Attendance[]
+//   department    Department     @relation(fields: [departmentId], references: [id])
+//   goals         Goal[]
+//   leaveRequests LeaveRequest[]
+//   recruitments  Recruitment[]
+//   salaries      Salary[]
+//   performanceReviews PerformanceReview[]
+
+//   @@index([departmentId])
+// }
+
+// model Goal {
+//   id          Int      @id @default(autoincrement())
+//   employeeId  Int
+//   name        String
+//   goalTitle   String
+//   description String
+//   deadline    DateTime
+//   status      String   @default("Not Started")
+//   progress    Int      @default(0)
+//   priority    String   @default("Medium")  // ← add this
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+//   employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+// }
+
+
+// model HRSystem {
+//   id          Int      @id @default(autoincrement())
+//   status      String
+//   lastUpdated DateTime
+//   version     String
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+// }
+
+// model LeaveRequest {
+//   id         Int      @id @default(autoincrement())
+//   employeeId Int
+//   startDate  DateTime
+//   endDate    DateTime
+//   status     String
+//   leaveType  String   // ← add this line
+//   reason     String
+//   createdAt  DateTime @default(now())
+//   updatedAt  DateTime @updatedAt
+
+//   employee   Employee @relation(fields: [employeeId], references: [id])
+// }
+
+
+// model Recruitment {
+//   id          Int      @id @default(autoincrement())
+//   type        String
+//   employeeId  Int
+//   date        DateTime
+//   status     String 
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+//   employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+//   @@index([employeeId])
+// }
+
+
+// model Reporting {
+//   id            String   @id
+//   name          String
+//   type          String
+//   date          DateTime
+//   status        String
+//   size          String
+//   downloads     Int
+//   generatedDate DateTime
+
+//   content       Json
+
+//   createdAt     DateTime @default(now())
+//   updatedAt     DateTime @updatedAt
+//   adminId       Int
+//   admin         Admin    @relation(fields: [adminId], references: [id])
+// }
+
+
+
+
+// model Salary {
+//   id            Int      @id @default(autoincrement())
+//   employeeId    Int
+//   baseSalary    Float
+//   allowances    Float     @default(0)
+//   deductions    Float     @default(0)
+//   payDate       DateTime
+//   overtimeHours Int
+//   createdAt     DateTime @default(now())
+//   updatedAt     DateTime @updatedAt
+//   employee      Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+//   @@index([employeeId])
+// }
+
+// model PerformanceReview {
+//   id           Int      @id @default(autoincrement())
+//   employeeId   Int
+//   rating       Float
+//   feedback     String
+//   reviewDate   DateTime
+//   reviewPeriod String
+//   goals        String
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @updatedAt
+//   employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+//   @@index([employeeId])
+// }
 
 generator client {
   provider = "prisma-client-js"
@@ -18,16 +188,41 @@ model Admin {
   reportings Reporting[]
 }
 
+
 model Attendance {
   id           Int      @id @default(autoincrement())
   employeeId   Int
-  checkInTime  DateTime
+  checkInTime  DateTime?
   checkOutTime DateTime?
+  breakStart   DateTime?
+  breakEnd     DateTime?
+  
+  totalHours   Float?    // Calculated total working hours
+  breakMinutes Int?      // Break duration in minutes
+  overtime     Float?    // Overtime hours if any
+  
+  date         DateTime  @db.Date  // Remove the @default(now())
+  status       AttendanceStatus @default(ABSENT)
+  notes        String?
+  location     String?   // Office, Remote, etc.
+  
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
+  @@unique([employeeId, date]) // One attendance record per employee per day
   @@index([employeeId])
+  @@index([date])
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+  ON_BREAK
+  EARLY_DEPARTURE
+  OVERTIME
 }
 
 model Department {
