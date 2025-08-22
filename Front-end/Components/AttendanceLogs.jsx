@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Download, Calendar, Filter, Clock, Users, TrendingUp, Eye } from 'lucide-react';
-import Sidebar from './Sidebar';
+import AttendanceTracker from './AttendanceTracker';
 import './AttendanceLogs.css';
 
 const AttendanceLogs = () => {
@@ -8,157 +8,210 @@ const AttendanceLogs = () => {
   const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [dateRange, setDateRange] = useState('today');
+  const [selectedEmployee, setSelectedEmployee] = useState('');
+  
+  // Backend data states
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [departments, setDepartments] = useState(['all']);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({});
+  const [stats, setStats] = useState({ total: 0, present: 0, absent: 0, late: 0 });
 
-
-  const handleLogout = () => {
-    console.log('Logout clicked');
+  // Fetch employees for dropdown
+  const fetchEmployees = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/employees', {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setEmployees(data);
+        
+        // Extract unique departments
+        const depts = ['all', ...new Set(data.map(emp => emp.department?.name).filter(Boolean))];
+        setDepartments(depts);
+      }
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    }
   };
 
-  const attendanceData = [
-    {
-      id: 1,
-      employeeId: 'EMP001',
-      name: 'Sarah Johnson',
-      department: 'Engineering',
-      avatar: 'SJ',
-      clockIn: '09:00 AM',
-      clockOut: '05:30 PM',
-      status: 'present',
-      totalHours: '8h 30m',
-      break: '45m',
-      location: 'Office',
-      date: '2025-07-12'
-    },
-    {
-      id: 2,
-      employeeId: 'EMP002',
-      name: 'Michael Chen',
-      department: 'Marketing',
-      avatar: 'MC',
-      clockIn: '09:15 AM',
-      clockOut: '05:45 PM',
-      status: 'late',
-      totalHours: '8h 30m',
-      break: '60m',
-      location: 'Remote',
-      date: '2025-07-12'
-    },
-    {
-      id: 3,
-      employeeId: 'EMP003',
-      name: 'Emily Rodriguez',
-      department: 'HR',
-      avatar: 'ER',
-      clockIn: '08:45 AM',
-      clockOut: '05:00 PM',
-      status: 'present',
-      totalHours: '8h 15m',
-      break: '30m',
-      location: 'Office',
-      date: '2025-07-12'
-    },
-    {
-      id: 4,
-      employeeId: 'EMP004',
-      name: 'David Kim',
-      department: 'Engineering',
-      avatar: 'DK',
-      clockIn: '--',
-      clockOut: '--',
-      status: 'absent',
-      totalHours: '0h',
-      break: '--',
-      location: '--',
-      date: '2025-07-12'
-    },
-    {
-      id: 5,
-      employeeId: 'EMP005',
-      name: 'Lisa Wang',
-      department: 'Finance',
-      avatar: 'LW',
-      clockIn: '09:05 AM',
-      clockOut: '04:30 PM',
-      status: 'early_departure',
-      totalHours: '7h 25m',
-      break: '45m',
-      location: 'Office',
-      date: '2025-07-12'
-    },
-    {
-      id: 6,
-      employeeId: 'EMP006',
-      name: 'James Wilson',
-      department: 'Sales',
-      avatar: 'JW',
-      clockIn: '08:30 AM',
-      clockOut: '06:15 PM',
-      status: 'overtime',
-      totalHours: '9h 45m',
-      break: '60m',
-      location: 'Office',
-      date: '2025-07-12'
-    }
-  ];
-
-  const departments = ['all', 'Engineering', 'Marketing', 'HR', 'Finance', 'Sales'];
-  const statuses = ['all', 'present', 'late', 'absent', 'early_departure', 'overtime'];
-
-  
-  const filteredData = useMemo(() => {
-    return attendanceData.filter(record => {
-      const matchesSearch = record.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          record.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesDepartment = selectedDepartment === 'all' || record.department === selectedDepartment;
-      const matchesStatus = selectedStatus === 'all' || record.status === selectedStatus;
+  // Fetch attendance logs
+  const fetchAttendanceLogs = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
       
-      return matchesSearch && matchesDepartment && matchesStatus;
-    });
-  }, [searchTerm, selectedDepartment, selectedStatus, attendanceData]);
+      if (selectedDepartment !== 'all') params.append('department', selectedDepartment);
+      if (selectedStatus !== 'all') params.append('status', selectedStatus);
+      
+      // Date range logic
+      const today = new Date();
+      if (dateRange === 'today') {
+        params.append('startDate', today.toISOString().split('T')[0]);
+        params.append('endDate', today.toISOString().split('T')[0]);
+      } else if (dateRange === 'yesterday') {
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        params.append('startDate', yesterday.toISOString().split('T')[0]);
+        params.append('endDate', yesterday.toISOString().split('T')[0]);
+      } else if (dateRange === 'this_week') {
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - today.getDay());
+        params.append('startDate', weekStart.toISOString().split('T')[0]);
+        params.append('endDate', today.toISOString().split('T')[0]);
+      }
 
+      const response = await fetch(`http://localhost:5000/api/attendance/logs?${params}`, {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setAttendanceData(data.logs || []);
+        setStats(data.stats || { total: 0, present: 0, absent: 0, late: 0 });
+        setPagination(data.pagination || {});
+      }
+    } catch (error) {
+      console.error('Error fetching attendance logs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const stats = useMemo(() => {
-    const total = filteredData.length;
-    const present = filteredData.filter(r => r.status === 'present' || r.status === 'late' || r.status === 'overtime' || r.status === 'early_departure').length;
-    const absent = filteredData.filter(r => r.status === 'absent').length;
-    const late = filteredData.filter(r => r.status === 'late').length;
+  // Load data on component mount
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  useEffect(() => {
+    fetchAttendanceLogs();
+  }, [selectedDepartment, selectedStatus, dateRange]);
+
+  // Filter data based on search term
+  const filteredData = useMemo(() => {
+    if (!searchTerm) return attendanceData;
     
-    return { total, present, absent, late };
-  }, [filteredData]);
+    return attendanceData.filter(record => {
+      const employeeName = record.employee?.name?.toLowerCase() || '';
+      const employeeEmail = record.employee?.email?.toLowerCase() || '';
+      const search = searchTerm.toLowerCase();
+      return employeeName.includes(search) || employeeEmail.includes(search);
+    });
+  }, [attendanceData, searchTerm]);
 
   const getStatusBadge = (status) => {
     const statusClasses = {
-      present: 'status-present',
-      late: 'status-late',
-      absent: 'status-absent',
-      early_departure: 'status-early',
-      overtime: 'status-overtime'
+      PRESENT: 'status-present',
+      LATE: 'status-late',
+      ABSENT: 'status-absent',
+      EARLY_DEPARTURE: 'status-early',
+      OVERTIME: 'status-overtime',
+      HALF_DAY: 'status-early',
+      ON_BREAK: 'status-late'
     };
-
+    
     const statusLabels = {
-      present: 'Present',
-      late: 'Late',
-      absent: 'Absent',
-      early_departure: 'Early Out',
-      overtime: 'Overtime'
+      PRESENT: 'Present',
+      LATE: 'Late',
+      ABSENT: 'Absent',
+      EARLY_DEPARTURE: 'Early Out',
+      OVERTIME: 'Overtime',
+      HALF_DAY: 'Half Day',
+      ON_BREAK: 'On Break'
     };
-
+    
     return (
-      <span className={`status-badge ${statusClasses[status] || statusClasses.present}`}>
+      <span className={`status-badge ${statusClasses[status] || statusClasses.PRESENT}`}>
         {statusLabels[status] || 'Present'}
       </span>
     );
   };
 
+  const formatTime = (dateString) => {
+    if (!dateString) return '--:--';
+    return new Date(dateString).toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const formatHours = (hours) => {
+    if (!hours) return '--';
+    return `${hours.toFixed(1)}h`;
+  };
+
   const handleExport = () => {
-    console.log('Exporting attendance data...');
+    // Create CSV content
+    const headers = ['Date', 'Employee', 'Check In', 'Check Out', 'Total Hours', 'Break (mins)', 'Status', 'Location'];
+    const csvContent = [
+      headers.join(','),
+      ...filteredData.map(record => [
+        new Date(record.date).toLocaleDateString(),
+        record.employee?.name || '',
+        formatTime(record.checkInTime),
+        formatTime(record.checkOutTime),
+        formatHours(record.totalHours),
+        record.breakMinutes || 0,
+        record.status,
+        record.location || 'Office'
+      ].map(field => `"${field}"`).join(','))
+    ].join('\n');
+
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `attendance_logs_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleAttendanceUpdate = () => {
+    // Refresh logs when attendance is updated
+    fetchAttendanceLogs();
   };
 
   return (
     <div className="attendance-layout">
-      <Sidebar onLogout={handleLogout} />
       <div className="attendance-main-content">
         <div className="attendance-container">
+          
+          {/* Attendance Tracker Section */}
+          <div className="tracker-section" style={{ marginBottom: '24px' }}>
+            <div className="employee-selector" style={{ marginBottom: '16px' }}>
+              <label htmlFor="employee-select" style={{ 
+                display: 'block', 
+                marginBottom: '8px', 
+                fontWeight: '600',
+                color: '#0C3D4A'
+              }}>
+                Select Employee for Attendance Tracking:
+              </label>
+              <select
+                id="employee-select"
+                value={selectedEmployee}
+                onChange={(e) => setSelectedEmployee(e.target.value)}
+                className="filter-select"
+                style={{ minWidth: '300px' }}
+              >
+                <option value="">-- Select Employee --</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>
+                    {emp.name} ({emp.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <AttendanceTracker 
+              employeeId={selectedEmployee}
+              onAttendanceUpdate={handleAttendanceUpdate}
+            />
+          </div>
+
           {/* Stats Cards */}
           <div className="stats-grid">
             <div className="stat-card stat-blue">
@@ -172,7 +225,6 @@ const AttendanceLogs = () => {
                 </div>
               </div>
             </div>
-
             <div className="stat-card stat-green">
               <div className="stat-content">
                 <div className="stat-info">
@@ -184,7 +236,6 @@ const AttendanceLogs = () => {
                 </div>
               </div>
             </div>
-
             <div className="stat-card stat-yellow">
               <div className="stat-content">
                 <div className="stat-info">
@@ -196,7 +247,6 @@ const AttendanceLogs = () => {
                 </div>
               </div>
             </div>
-
             <div className="stat-card stat-red">
               <div className="stat-content">
                 <div className="stat-info">
@@ -214,7 +264,6 @@ const AttendanceLogs = () => {
           <div className="filters-container">
             <div className="filters-row">
               <div className="search-filters">
-                {/* Search */}
                 <div className="search-box">
                   <Search className="search-icon" />
                   <input
@@ -225,9 +274,7 @@ const AttendanceLogs = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-
-                {/* Date Range */}
-                <select 
+                <select
                   className="filter-select"
                   value={dateRange}
                   onChange={(e) => setDateRange(e.target.value)}
@@ -238,9 +285,7 @@ const AttendanceLogs = () => {
                   <option value="last_week">Last Week</option>
                   <option value="this_month">This Month</option>
                 </select>
-
-                {/* Department Filter */}
-                <select 
+                <select
                   className="filter-select"
                   value={selectedDepartment}
                   onChange={(e) => setSelectedDepartment(e.target.value)}
@@ -251,23 +296,21 @@ const AttendanceLogs = () => {
                     </option>
                   ))}
                 </select>
-
-                {/* Status Filter */}
-                <select 
+                <select
                   className="filter-select"
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
                 >
-                  {statuses.map(status => (
-                    <option key={status} value={status}>
-                      {status === 'all' ? 'All Status' : status.replace('_', ' ').toUpperCase()}
-                    </option>
-                  ))}
+                  <option value="all">All Status</option>
+                  <option value="PRESENT">Present</option>
+                  <option value="LATE">Late</option>
+                  <option value="ABSENT">Absent</option>
+                  <option value="HALF_DAY">Half Day</option>
+                  <option value="EARLY_DEPARTURE">Early Out</option>
+                  <option value="OVERTIME">Overtime</option>
                 </select>
               </div>
-
-              {/* Export Button */}
-              <button onClick={handleExport} className="export-btn">
+              <button onClick={handleExport} className="export-btn" disabled={loading}>
                 <Download className="btn-icon" />
                 Export
               </button>
@@ -277,45 +320,60 @@ const AttendanceLogs = () => {
           {/* Attendance Table */}
           <div className="attendance-table-container">
             <div className="table-wrapper">
-              <table className="attendance-table">
-                <thead className="table-header">
-                  <tr>
-                    <th className="table-th">Employee</th>
-                    <th className="table-th">Clock In</th>
-                    <th className="table-th">Clock Out</th>
-                    <th className="table-th">Total Hours</th>
-                    <th className="table-th">Break</th>
-                    <th className="table-th">Status</th>
-                    <th className="table-th">Location</th>
-                  </tr>
-                </thead>
-                <tbody className="table-body">
-                  {filteredData.map((record) => (
-                    <tr key={record.id} className="table-row">
-                      <td className="table-td">
-                        <div className="employee-info">
-                          <div className="employee-avatar">
-                            <span className="avatar-text">{record.avatar}</span>
-                          </div>
-                          <div className="employee-details">
-                            <div className="employee-name">{record.name}</div>
-                            <div className="employee-meta">{record.employeeId} • {record.department}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="table-td table-time">{record.clockIn}</td>
-                      <td className="table-td table-time">{record.clockOut}</td>
-                      <td className="table-td table-hours">{record.totalHours}</td>
-                      <td className="table-td table-break">{record.break}</td>
-                      <td className="table-td">{getStatusBadge(record.status)}</td>
-                      <td className="table-td table-location">{record.location}</td>
+              {loading ? (
+                <div style={{ 
+                  padding: '40px', 
+                  textAlign: 'center', 
+                  color: '#666' 
+                }}>
+                  Loading attendance data...
+                </div>
+              ) : (
+                <table className="attendance-table">
+                  <thead className="table-header">
+                    <tr>
+                      <th className="table-th">Employee</th>
+                      <th className="table-th">Date</th>
+                      <th className="table-th">Clock In</th>
+                      <th className="table-th">Clock Out</th>
+                      <th className="table-th">Total Hours</th>
+                      <th className="table-th">Break</th>
+                      <th className="table-th">Status</th>
+                      <th className="table-th">Location</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="table-body">
+                    {filteredData.map(record => (
+                      <tr key={record.id} className="table-row">
+                        <td className="table-td">
+                          <div className="employee-info">
+                            <div className="employee-avatar">
+                              <span className="avatar-text">
+                                {record.employee?.name?.split(' ').map(n => n[0]).join('') || 'NA'}
+                              </span>
+                            </div>
+                            <div className="employee-details">
+                              <div className="employee-name">{record.employee?.name || 'Unknown'}</div>
+                              <div className="employee-meta">
+                                {record.employee?.email} • {record.employee?.department?.name}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="table-td">{new Date(record.date).toLocaleDateString()}</td>
+                        <td className="table-td table-time">{formatTime(record.checkInTime)}</td>
+                        <td className="table-td table-time">{formatTime(record.checkOutTime)}</td>
+                        <td className="table-td table-hours">{formatHours(record.totalHours)}</td>
+                        <td className="table-td table-break">{record.breakMinutes || 0}m</td>
+                        <td className="table-td">{getStatusBadge(record.status)}</td>
+                        <td className="table-td table-location">{record.location || 'Office'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
-
-            {filteredData.length === 0 && (
+            {!loading && filteredData.length === 0 && (
               <div className="empty-state">
                 <div className="empty-title">No attendance records found</div>
                 <div className="empty-subtitle">Try adjusting your search or filter criteria</div>
@@ -327,16 +385,15 @@ const AttendanceLogs = () => {
           {filteredData.length > 0 && (
             <div className="pagination-container">
               <div className="pagination-info">
-                Showing <span className="pagination-highlight">1</span> to <span className="pagination-highlight">{filteredData.length}</span> of{' '}
-                <span className="pagination-highlight">{filteredData.length}</span> results
+                Showing <span className="pagination-highlight">1</span> to{' '}
+                <span className="pagination-highlight">{filteredData.length}</span> of{' '}
+                <span className="pagination-highlight">{pagination.total || filteredData.length}</span> results
               </div>
               <div className="pagination-controls">
                 <button className="pagination-btn pagination-btn-disabled" disabled>
                   Previous
                 </button>
-                <button className="pagination-btn pagination-btn-active">
-                  1
-                </button>
+                <button className="pagination-btn pagination-btn-active">1</button>
                 <button className="pagination-btn pagination-btn-disabled" disabled>
                   Next
                 </button>
