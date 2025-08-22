@@ -1,4 +1,4 @@
-/* AttendanceLogs.css */
+/* AttendanceLogs.css - Complete File */
 
 * {
   margin: 0;
@@ -6,7 +6,7 @@
   box-sizing: border-box;
 }
 
-/* Layout with Sidebar */
+/* Layout without Sidebar */
 .attendance-layout {
   display: flex;
   min-height: 100vh;
@@ -15,22 +15,23 @@
 }
 
 .attendance-main-content {
-  margin-left: 280px;
   flex: 1;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: #f5f5f5;
+  padding: 20px;
 }
 
 .attendance-container {
   max-width: 1200px;
-  margin: 20px auto;
+  margin: 0 auto;
   padding: 32px;
   background-color: #f8f9fa;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  width: 100%;
 }
 
 /* Stats Grid */
@@ -474,12 +475,348 @@
   cursor: not-allowed;
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .attendance-main-content {
-    margin-left: 0;
+/* ========================================
+   ATTENDANCE TRACKER SPECIFIC STYLES
+   ======================================== */
+
+/* Attendance Tracker Card */
+.attendance-tracker-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.attendance-tracker-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #0C3D4A, #1a4f5e);
+}
+
+/* Tracker Header */
+.tracker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.tracker-header h3 {
+  margin: 0;
+  color: #0C3D4A;
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  width: 24px;
+  height: 24px;
+  color: #0C3D4A;
+}
+
+.current-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.time-label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.time-display {
+  font-size: 18px;
+  font-weight: 600;
+  color: #10b981;
+  font-family: 'Courier New', monospace;
+}
+
+/* No Employee Selected */
+.no-employee-selected {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+}
+
+.no-employee-selected p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+/* Status Section */
+.attendance-status-section {
+  margin-bottom: 24px;
+}
+
+.status-card-tracker {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.status-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 16px;
+}
+
+/* Time Info Grid */
+.time-info-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.time-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.time-row:last-child {
+  border-bottom: none;
+}
+
+.time-row span:first-child {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.time-value {
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Courier New', monospace;
+}
+
+.session-row .session-time {
+  font-size: 18px !important;
+  color: #10b981 !important;
+  font-weight: 700;
+  animation: pulse 2s infinite;
+}
+
+.overtime-row .overtime-value {
+  color: #dc2626 !important;
+  font-weight: 600;
+}
+
+/* Break Info Alert */
+.break-info-alert {
+  margin-top: 12px;
+  padding: 12px;
+  background: #fef3c7;
+  border-radius: 6px;
+  border-left: 4px solid #f59e0b;
+}
+
+.break-info-alert span {
+  color: #92400e;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* No Attendance Card */
+.no-attendance-card {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+}
+
+.no-attendance-card p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+/* Action Buttons */
+.action-buttons-section {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Tracker Buttons */
+.tracker-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tracker-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tracker-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Variants */
+.btn-check-in {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.btn-check-in:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.btn-check-out {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+.btn-check-out:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.btn-break {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+
+.btn-break:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d97706, #b45309);
+}
+
+.btn-end-break {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+}
+
+.btn-end-break:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.btn-refresh {
+  background: transparent;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  min-width: auto;
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+.btn-refresh:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* Completed Message */
+.completed-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  background: #d1fae5;
+  border-radius: 10px;
+  border: 1px solid #a7f3d0;
+}
+
+.check-icon {
+  font-size: 24px;
+}
+
+.completed-message span:last-child {
+  font-weight: 600;
+  color: #065f46;
+  font-size: 16px;
+}
+
+/* Refresh Section */
+.refresh-section {
+  text-align: center;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Employee Selector Styles */
+.employee-selector label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #0C3D4A;
+  font-size: 14px;
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0% {
+    opacity: 1;
   }
-  
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Integration with existing styles */
+.tracker-section {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 24px;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 1200px) {
   .attendance-container {
     margin: 10px;
     padding: 20px;
@@ -551,12 +888,54 @@
     gap: 16px;
     text-align: center;
   }
+
+  /* Tracker responsive styles */
+  .attendance-tracker-card {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .tracker-header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .tracker-header h3 {
+    font-size: 18px;
+  }
+
+  .current-time {
+    align-items: center;
+  }
+
+  .button-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tracker-btn {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .time-row {
+    font-size: 14px;
+  }
+
+  .session-row .session-time {
+    font-size: 16px !important;
+  }
 }
 
 @media (max-width: 480px) {
+  .attendance-main-content {
+    padding: 10px;
+  }
+  
   .attendance-container {
     padding: 16px;
-    margin: 5px;
+    margin: 0;
   }
   
   .stat-card {
@@ -597,5 +976,31 @@
   .status-badge {
     font-size: 10px;
     padding: 4px 8px;
+  }
+
+  /* Additional tracker responsive styles */
+  .attendance-tracker-card {
+    padding: 12px;
+  }
+
+  .tracker-header h3 {
+    font-size: 16px;
+  }
+
+  .status-card-tracker {
+    padding: 16px;
+  }
+
+  .tracker-btn {
+    padding: 10px 20px;
+    font-size: 12px;
+  }
+
+  .time-display {
+    font-size: 16px;
+  }
+
+  .completed-message {
+    padding: 16px;
   }
 }
