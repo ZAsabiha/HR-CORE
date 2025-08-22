@@ -11,6 +11,7 @@ import reviewRoutes from './src/routes/reviewRoutes.js';
 import salaryRoutes from './src/routes/salaryRoutes.js';
 import authRoutes from './src/routes/authRoutes.js';
 import reportingRoutes from './src/routes/reportingRoutes.js';
+import attendanceRoutes from './src/routes/attendanceRoutes.js';
 
 const app = express();
 app.use(express.json());
@@ -36,6 +37,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/salaries', salaryRoutes);
 app.use('/auth', express.json(), authRoutes);
 app.use('/api/reports', reportingRoutes); 
+app.use('/api/attendance', attendanceRoutes);
 
 // Enhanced seed function for reports with more comprehensive data
 async function seedReports(adminId) {
@@ -1028,6 +1030,7 @@ async function main() {
           employeeId: empId,
           checkInTime: new Date('2025-06-26T09:00:00'),
           checkOutTime: new Date('2025-06-26T17:00:00'),
+          date: new Date('2025-06-26'), 
         }
       });
     }
