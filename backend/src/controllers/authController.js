@@ -14,7 +14,7 @@ export const login = async (req, res) => {
     username = String(username).trim();
     const plain = String(password);
 
-    // 1) Try admin login
+    
     const admin = await prisma.admin.findFirst({
       where: { email: username },
       select: { id: true, name: true, email: true, password: true }
@@ -33,7 +33,7 @@ export const login = async (req, res) => {
       }
     }
 
-    // 2) Try employee / team lead login
+    
     const employee = await prisma.employee.findFirst({
       where: { email: username },
       select: {
@@ -55,7 +55,7 @@ export const login = async (req, res) => {
           id: employee.id,
           name: employee.name,
           email: employee.email,
-          role: employee.role, // 'EMPLOYEE' | 'TEAM_LEAD'
+          role: employee.role,
           departmentId: employee.departmentId ?? null,
           position: employee.position ?? null
         };
@@ -63,7 +63,7 @@ export const login = async (req, res) => {
       }
     }
 
-    // 3) If neither matched
+    
     return res.status(401).json({ message: 'Invalid credentials' });
   } catch (err) {
     console.error('Login error:', err);
@@ -78,7 +78,7 @@ export const logout = (req, res) => {
         console.error('Logout error:', err);
         return res.status(500).json({ message: 'Logout failed' });
       }
-      res.clearCookie('connect.sid'); // match session cookie name
+      res.clearCookie('connect.sid'); 
       return res.json({ message: 'Logged out' });
     });
   } catch (err) {
@@ -91,7 +91,7 @@ export const status = (req, res) => {
   if (req.session?.user) {
     return res.json({
       loggedIn: true,
-      user: req.session.user // includes role
+      user: req.session.user
     });
   }
   return res.json({ loggedIn: false });
