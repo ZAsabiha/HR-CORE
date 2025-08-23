@@ -39,7 +39,7 @@ app.use('/auth', express.json(), authRoutes);
 app.use('/api/reports', reportingRoutes); 
 app.use('/api/attendance', attendanceRoutes);
 
-// Enhanced seed function for reports with more comprehensive data
+
 async function seedReports(adminId) {
   const reports = [
     {
@@ -705,12 +705,12 @@ async function seedReports(adminId) {
     }
   ];
 
-  // Loop through the reports to insert them into the database
+ 
   for (const report of reports) {
     await prisma.reporting.upsert({
       where: { id: report.id },
-      update: {}, // No update logic needed for this case
-      create: report,  // Inserting new report
+      update: {}, 
+      create: report,  
     });
   }
   console.log('Reports seeded successfully!');
@@ -883,7 +883,7 @@ async function main() {
   const plainAdminPassword = 'securepassword123';
   const hashedAdminPassword = await bcrypt.hash(plainAdminPassword, 10);
 
-  // Hash passwords for team lead and employee
+
   const hashedTeamLeadPassword = await bcrypt.hash('team123', 10);
   const hashedEmployeePassword = await bcrypt.hash('employee123', 10);
 
@@ -899,7 +899,7 @@ async function main() {
     create: { name: 'Engineering' }
   });
 
-  // Admin (with ADMIN role)
+ 
   const admin = await prisma.admin.upsert({
     where: { email: 'admin@hrcore.com' },
     update: { password: hashedAdminPassword },
@@ -910,7 +910,7 @@ async function main() {
     }
   });
 
-  // Create default Team Lead account
+
   const teamLead = await prisma.employee.upsert({
     where: { email: 'teamlead@hrcore.com' },
     update: { password: hashedTeamLeadPassword },
@@ -929,7 +929,7 @@ async function main() {
     }
   });
 
-  // Create default Employee account
+  
   const defaultEmployee = await prisma.employee.upsert({
     where: { email: 'employee@hrcore.com' },
     update: { password: hashedEmployeePassword },
@@ -951,10 +951,10 @@ async function main() {
   const existingEmployees = await prisma.employee.findMany();
   const employeeRecords = [];
 
-  // Update existing employees without passwords
+ 
   for (const emp of existingEmployees) {
     if (!emp.password && emp.email !== 'teamlead@hrcore.com' && emp.email !== 'employee@hrcore.com') {
-      // Assign default password to existing employees
+      
       const defaultPassword = await bcrypt.hash('default123', 10);
       await prisma.employee.update({
         where: { id: emp.id },
@@ -963,7 +963,7 @@ async function main() {
     }
   }
 
-  // Create additional employees if none exist (excluding the default accounts)
+
   const regularEmployees = existingEmployees.filter(emp => 
     emp.email !== 'teamlead@hrcore.com' && emp.email !== 'employee@hrcore.com'
   );
@@ -1003,10 +1003,10 @@ async function main() {
     employeeRecords.push(...regularEmployees);
   }
 
-  // Add the default accounts to employee records for goal/attendance seeding
+
   employeeRecords.push(teamLead, defaultEmployee);
 
-  // Continue with your existing seeding logic for goals, attendance, etc.
+
   for (const emp of employeeRecords) {
     const empId = emp.id;
 
@@ -1086,10 +1086,10 @@ async function main() {
     }
   }
 
-  // Seed comprehensive reports
+  
   await seedReports(admin.id);
   
-  // Create HR System record if it doesn't exist
+
   if (!await prisma.hRSystem.findFirst()) {
     await prisma.hRSystem.create({
       data: { 
