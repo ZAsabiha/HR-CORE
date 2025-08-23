@@ -10,7 +10,7 @@ const AttendanceLogs = () => {
   const [dateRange, setDateRange] = useState('today');
   const [selectedEmployee, setSelectedEmployee] = useState('');
   
-  // Backend data states
+ 
   const [attendanceData, setAttendanceData] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState(['all']);
@@ -18,7 +18,7 @@ const AttendanceLogs = () => {
   const [pagination, setPagination] = useState({});
   const [stats, setStats] = useState({ total: 0, present: 0, absent: 0, late: 0 });
 
-  // Fetch employees for dropdown
+ 
   const fetchEmployees = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/employees', {
@@ -37,7 +37,7 @@ const AttendanceLogs = () => {
     }
   };
 
-  // Fetch attendance logs
+  
   const fetchAttendanceLogs = async () => {
     setLoading(true);
     try {
@@ -46,7 +46,7 @@ const AttendanceLogs = () => {
       if (selectedDepartment !== 'all') params.append('department', selectedDepartment);
       if (selectedStatus !== 'all') params.append('status', selectedStatus);
       
-      // Date range logic
+     
       const today = new Date();
       if (dateRange === 'today') {
         params.append('startDate', today.toISOString().split('T')[0]);
@@ -80,7 +80,7 @@ const AttendanceLogs = () => {
     }
   };
 
-  // Load data on component mount
+
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -89,7 +89,7 @@ const AttendanceLogs = () => {
     fetchAttendanceLogs();
   }, [selectedDepartment, selectedStatus, dateRange]);
 
-  // Filter data based on search term
+  
   const filteredData = useMemo(() => {
     if (!searchTerm) return attendanceData;
     
@@ -143,7 +143,7 @@ const AttendanceLogs = () => {
   };
 
   const handleExport = () => {
-    // Create CSV content
+    
     const headers = ['Date', 'Employee', 'Check In', 'Check Out', 'Total Hours', 'Break (mins)', 'Status', 'Location'];
     const csvContent = [
       headers.join(','),
@@ -159,7 +159,7 @@ const AttendanceLogs = () => {
       ].map(field => `"${field}"`).join(','))
     ].join('\n');
 
-    // Download CSV
+    
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -170,7 +170,7 @@ const AttendanceLogs = () => {
   };
 
   const handleAttendanceUpdate = () => {
-    // Refresh logs when attendance is updated
+  
     fetchAttendanceLogs();
   };
 
