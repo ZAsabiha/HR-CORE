@@ -1,12 +1,10 @@
-/* AttendanceLogs.css - Complete File */
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Layout without Sidebar */
+
 .attendance-layout {
   display: flex;
   min-height: 100vh;
@@ -34,7 +32,7 @@
   width: 100%;
 }
 
-/* Stats Grid */
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -134,7 +132,7 @@
   margin: 0;
 }
 
-/* Filters Container */
+
 .filters-container {
   background-color: white;
   padding: 24px;
@@ -248,7 +246,7 @@
   height: 16px;
 }
 
-/* Attendance Table */
+
 .attendance-table-container {
   background-color: white;
   border-radius: 12px;
@@ -360,7 +358,7 @@
   color: #666;
 }
 
-/* Status Badges */
+
 .status-badge {
   padding: 6px 12px;
   border-radius: 20px;
@@ -401,7 +399,7 @@
   border: 1px solid #bee5eb;
 }
 
-/* Empty State */
+
 .empty-state {
   text-align: center;
   padding: 48px 24px;
@@ -420,7 +418,7 @@
   color: #999;
 }
 
-/* Pagination */
+
 .pagination-container {
   display: flex;
   justify-content: space-between;
@@ -475,11 +473,7 @@
   cursor: not-allowed;
 }
 
-/* ========================================
-   ATTENDANCE TRACKER SPECIFIC STYLES
-   ======================================== */
 
-/* Attendance Tracker Card */
 .attendance-tracker-card {
   background: white;
   border-radius: 16px;
@@ -501,7 +495,7 @@
   background: linear-gradient(135deg, #0C3D4A, #1a4f5e);
 }
 
-/* Tracker Header */
+
 .tracker-header {
   display: flex;
   justify-content: space-between;
@@ -548,7 +542,7 @@
   font-family: 'Courier New', monospace;
 }
 
-/* No Employee Selected */
+
 .no-employee-selected {
   text-align: center;
   padding: 40px 20px;
@@ -563,7 +557,7 @@
   font-size: 16px;
 }
 
-/* Status Section */
+
 .attendance-status-section {
   margin-bottom: 24px;
 }
@@ -588,7 +582,7 @@
   font-size: 16px;
 }
 
-/* Time Info Grid */
+
 .time-info-grid {
   display: grid;
   gap: 12px;
@@ -629,7 +623,7 @@
   font-weight: 600;
 }
 
-/* Break Info Alert */
+
 .break-info-alert {
   margin-top: 12px;
   padding: 12px;
@@ -644,7 +638,7 @@
   font-size: 14px;
 }
 
-/* No Attendance Card */
+
 .no-attendance-card {
   text-align: center;
   padding: 40px 20px;
@@ -659,7 +653,7 @@
   font-size: 16px;
 }
 
-/* Action Buttons */
+
 .action-buttons-section {
   margin-bottom: 20px;
   text-align: center;
@@ -672,7 +666,7 @@
   flex-wrap: wrap;
 }
 
-/* Tracker Buttons */
+
 .tracker-btn {
   padding: 12px 24px;
   border: none;
@@ -701,7 +695,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Button Variants */
+
 .btn-check-in {
   background: linear-gradient(135deg, #10b981, #059669);
   color: white;
@@ -752,7 +746,7 @@
   border-color: #9ca3af;
 }
 
-/* Completed Message */
+
 .completed-message {
   display: flex;
   align-items: center;
@@ -774,14 +768,14 @@
   font-size: 16px;
 }
 
-/* Refresh Section */
+
 .refresh-section {
   text-align: center;
   padding-top: 16px;
   border-top: 1px solid #e5e7eb;
 }
 
-/* Employee Selector Styles */
+
 .employee-selector label {
   display: block;
   margin-bottom: 8px;
@@ -790,7 +784,6 @@
   font-size: 14px;
 }
 
-/* Pulse Animation */
 @keyframes pulse {
   0% {
     opacity: 1;
@@ -803,7 +796,7 @@
   }
 }
 
-/* Integration with existing styles */
+
 .tracker-section {
   background: transparent;
   border: none;
@@ -812,9 +805,6 @@
   margin-bottom: 24px;
 }
 
-/* ========================================
-   RESPONSIVE DESIGN
-   ======================================== */
 
 @media (max-width: 1200px) {
   .attendance-container {
@@ -889,7 +879,7 @@
     text-align: center;
   }
 
-  /* Tracker responsive styles */
+  
   .attendance-tracker-card {
     padding: 16px;
     margin-bottom: 16px;
@@ -978,7 +968,7 @@
     padding: 4px 8px;
   }
 
-  /* Additional tracker responsive styles */
+
   .attendance-tracker-card {
     padding: 12px;
   }
