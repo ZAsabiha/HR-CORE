@@ -150,7 +150,7 @@ export const checkOut = async (req, res) => {
     } else if (overtime > 0) {
       status = 'OVERTIME';
     } else if (attendance.status === 'LATE') {
-      status = 'LATE'; // Keep late status
+      status = 'LATE'; 
     }
 
    
@@ -431,4 +431,5 @@ const calculateAttendanceStats = async (where, employeeWhere) => {
     late
   };
 };
+
 
