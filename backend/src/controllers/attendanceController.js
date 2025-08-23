@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-// Helper functions
+
 const calculateHours = (startTime, endTime) => {
   if (!startTime || !endTime) return 0;
   const diffMs = new Date(endTime) - new Date(startTime);
@@ -22,14 +22,14 @@ const getTodayDate = () => {
   return new Date(`${year}-${month}-${day}`);
 };
 
-// Check-in employee
+
 export const checkIn = async (req, res) => {
   try {
     const { employeeId } = req.body;
     const now = new Date();
     const today = getTodayDate();
 
-    // Check if employee exists
+  
     const employee = await prisma.employee.findUnique({
       where: { id: parseInt(employeeId) }
     });
@@ -38,7 +38,7 @@ export const checkIn = async (req, res) => {
       return res.status(404).json({ error: 'Employee not found' });
     }
 
-    // Check if already checked in today
+  
     let attendance = await prisma.attendance.findUnique({
       where: {
         employeeId_date: {
@@ -55,12 +55,12 @@ export const checkIn = async (req, res) => {
       });
     }
 
-    // Determine if late (assuming 9 AM is standard start time)
+    
     const standardStartTime = new Date(today);
     standardStartTime.setHours(9, 0, 0, 0);
     const isLate = now > standardStartTime;
 
-    // Create or update attendance record
+ 
     attendance = await prisma.attendance.upsert({
       where: {
         employeeId_date: {
@@ -71,7 +71,7 @@ export const checkIn = async (req, res) => {
       update: {
         checkInTime: now,
         status: isLate ? 'LATE' : 'PRESENT',
-        location: 'Office' // Default location
+        location: 'Office' 
       },
       create: {
         employeeId: parseInt(employeeId),
@@ -103,14 +103,14 @@ export const checkIn = async (req, res) => {
   }
 };
 
-// Check-out employee
+
 export const checkOut = async (req, res) => {
   try {
     const { employeeId } = req.body;
     const now = new Date();
     const today = getTodayDate();
 
-    // Find today's attendance record
+ 
     const attendance = await prisma.attendance.findUnique({
       where: {
         employeeId_date: {
@@ -131,19 +131,19 @@ export const checkOut = async (req, res) => {
       });
     }
 
-    // Calculate total hours and break time
+
     const totalHours = calculateHours(attendance.checkInTime, now);
     const breakMinutes = attendance.breakStart && attendance.breakEnd 
       ? calculateMinutes(attendance.breakStart, attendance.breakEnd) 
       : 0;
 
-    // Calculate working hours (total - break time)
+    
     const workingHours = totalHours - (breakMinutes / 60);
     
-    // Calculate overtime (assuming 8 hours is standard work day)
+   
     const overtime = workingHours > 8 ? workingHours - 8 : 0;
     
-    // Determine status
+  
     let status = 'PRESENT';
     if (workingHours < 4) {
       status = 'HALF_DAY';
@@ -153,14 +153,14 @@ export const checkOut = async (req, res) => {
       status = 'LATE'; // Keep late status
     }
 
-    // Check for early departure (before 5 PM)
+   
     const standardEndTime = new Date(today);
     standardEndTime.setHours(17, 0, 0, 0);
     if (now < standardEndTime && workingHours >= 4) {
       status = 'EARLY_DEPARTURE';
     }
 
-    // Update attendance record
+   
     const updatedAttendance = await prisma.attendance.update({
       where: { id: attendance.id },
       data: {
@@ -195,7 +195,7 @@ export const checkOut = async (req, res) => {
   }
 };
 
-// Start break
+
 export const startBreak = async (req, res) => {
   try {
     const { employeeId } = req.body;
@@ -223,7 +223,7 @@ export const startBreak = async (req, res) => {
       where: { id: attendance.id },
       data: {
         breakStart: now,
-        breakEnd: null, // Reset break end
+        breakEnd: null, 
         status: 'ON_BREAK'
       }
     });
@@ -239,7 +239,7 @@ export const startBreak = async (req, res) => {
   }
 };
 
-// End break
+
 export const endBreak = async (req, res) => {
   try {
     const { employeeId } = req.body;
@@ -286,7 +286,7 @@ export const endBreak = async (req, res) => {
   }
 };
 
-// Get current attendance status
+
 export const getCurrentAttendance = async (req, res) => {
   try {
     const { employeeId } = req.params;
@@ -317,7 +317,7 @@ export const getCurrentAttendance = async (req, res) => {
   }
 };
 
-// Get attendance logs with filters (extends your existing functionality)
+
 export const getAttendanceLogs = async (req, res) => {
   try {
     const { 
@@ -341,7 +341,7 @@ export const getAttendanceLogs = async (req, res) => {
       if (endDate) where.date.lte = new Date(endDate);
     }
 
-    // Add department filter through employee relation
+   
     const employeeWhere = {};
     if (department && department !== 'all') {
       employeeWhere.department = { name: department };
@@ -381,7 +381,7 @@ export const getAttendanceLogs = async (req, res) => {
       })
     ]);
 
-    // Calculate statistics for the filtered data
+    
     const stats = await calculateAttendanceStats(where, employeeWhere);
 
     res.json({
@@ -400,11 +400,11 @@ export const getAttendanceLogs = async (req, res) => {
   }
 };
 
-// Helper function to calculate attendance statistics
+
 const calculateAttendanceStats = async (where, employeeWhere) => {
   const today = getTodayDate();
   
-  // Get today's attendance records
+
   const todayRecords = await prisma.attendance.findMany({
     where: {
       ...where,
@@ -431,3 +431,4 @@ const calculateAttendanceStats = async (where, employeeWhere) => {
     late
   };
 };
+
