@@ -163,7 +163,7 @@ export const getOvertimeData = async (req, res) => {
         checkOutTime: record.checkOutTime,
         totalHours: record.totalHours,
         regularHours,
-        overtimeHours,
+        overtimeHours: parseFloat(parseFloat(overtimeHours).toFixed(2)), // Fixed precision
         hourlyRate: parseFloat(hourlyRate.toFixed(2)),
         regularPay: parseFloat(regularPay.toFixed(2)),
         overtimePay: parseFloat(overtimePay.toFixed(2)),
@@ -178,10 +178,10 @@ export const getOvertimeData = async (req, res) => {
     const stats = {
       totalEmployees: new Set(processedRecords.map(r => r.employeeId)).size,
       totalRecords: total,
-      totalOvertimeHours: parseFloat(processedRecords.reduce((sum, r) => sum + r.overtimeHours, 0).toFixed(1)),
+      totalOvertimeHours: parseFloat(processedRecords.reduce((sum, r) => sum + r.overtimeHours, 0).toFixed(2)), // Fixed precision
       totalOvertimePay: parseFloat(processedRecords.reduce((sum, r) => sum + r.overtimePay, 0).toFixed(2)),
       averageOvertimeHours: processedRecords.length > 0 ? 
-        parseFloat((processedRecords.reduce((sum, r) => sum + r.overtimeHours, 0) / processedRecords.length).toFixed(1)) : 0
+        parseFloat((processedRecords.reduce((sum, r) => sum + r.overtimeHours, 0) / processedRecords.length).toFixed(2)) : 0 // Fixed precision
     };
 
     res.json({
@@ -277,7 +277,7 @@ export const getOvertimeSummary = async (req, res) => {
       summary.overtimeDays += 1;
       summary.records.push({
         date: record.date,
-        overtimeHours,
+        overtimeHours: parseFloat(parseFloat(overtimeHours).toFixed(2)), // Fixed precision
         overtimePay: parseFloat(overtimePay.toFixed(2))
       });
     });
@@ -285,7 +285,7 @@ export const getOvertimeSummary = async (req, res) => {
     // Convert to array and round totals
     const summaryArray = Object.values(employeeSummary).map(summary => ({
       ...summary,
-      totalOvertimeHours: parseFloat(summary.totalOvertimeHours.toFixed(1)),
+      totalOvertimeHours: parseFloat(summary.totalOvertimeHours.toFixed(2)), // Fixed precision
       totalOvertimePay: parseFloat(summary.totalOvertimePay.toFixed(2))
     }));
 
@@ -297,7 +297,7 @@ export const getOvertimeSummary = async (req, res) => {
       data: summaryArray,
       summary: {
         totalEmployees: summaryArray.length,
-        grandTotalOvertimeHours: parseFloat(summaryArray.reduce((sum, emp) => sum + emp.totalOvertimeHours, 0).toFixed(1)),
+        grandTotalOvertimeHours: parseFloat(summaryArray.reduce((sum, emp) => sum + emp.totalOvertimeHours, 0).toFixed(2)), // Fixed precision
         grandTotalOvertimePay: parseFloat(summaryArray.reduce((sum, emp) => sum + emp.totalOvertimePay, 0).toFixed(2))
       }
     });
@@ -367,7 +367,7 @@ export const generatePayrollWithOvertime = async (req, res) => {
           allowances: parseFloat(overtimePay.toFixed(2)), // Store overtime pay as allowances
           deductions: parseFloat(deductions.toFixed(2)),
           payDate: new Date(endDate),
-          overtimeHours: parseInt(totalOvertimeHours)
+          overtimeHours: parseFloat(parseFloat(totalOvertimeHours).toFixed(2)) // Fixed precision
         }
       });
 
@@ -375,8 +375,8 @@ export const generatePayrollWithOvertime = async (req, res) => {
         salaryRecord,
         employeeName: employee.name,
         department: employee.department.name,
-        totalRegularHours: parseFloat(totalRegularHours.toFixed(1)),
-        totalOvertimeHours: parseFloat(totalOvertimeHours.toFixed(1)),
+        totalRegularHours: parseFloat(totalRegularHours.toFixed(2)), // Fixed precision
+        totalOvertimeHours: parseFloat(totalOvertimeHours.toFixed(2)), // Fixed precision
         regularPay: parseFloat(regularPay.toFixed(2)),
         overtimePay: parseFloat(overtimePay.toFixed(2)),
         grossPay: parseFloat(grossPay.toFixed(2)),
