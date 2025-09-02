@@ -7,7 +7,7 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sessionTime, setSessionTime] = useState('00:00:00');
 
-
+  // Update current time every second
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -16,13 +16,13 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
     return () => clearInterval(timer);
   }, []);
 
-  
+  // Calculate session time if checked in
   useEffect(() => {
     if (currentAttendance?.checkInTime && !currentAttendance?.checkOutTime) {
       const checkInTime = new Date(currentAttendance.checkInTime);
       const now = new Date();
       
-     
+      // If on break, calculate up to break start
       let endTime = now;
       if (currentAttendance.status === 'ON_BREAK' && currentAttendance.breakStart) {
         endTime = new Date(currentAttendance.breakStart);
@@ -30,7 +30,7 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
       
       const diff = endTime - checkInTime;
       
-      
+      // Subtract any completed break time
       let breakTime = 0;
       if (currentAttendance.breakMinutes) {
         breakTime = currentAttendance.breakMinutes * 60 * 1000;
@@ -48,7 +48,7 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
     }
   }, [currentTime, currentAttendance]);
 
-  
+  // Fetch current attendance status
   const fetchCurrentAttendance = async () => {
     if (!employeeId) return;
     
@@ -63,12 +63,12 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
     }
   };
 
-  
+  // Load current attendance on component mount
   useEffect(() => {
     fetchCurrentAttendance();
   }, [employeeId]);
 
-  
+  // Handle API calls
   const makeAttendanceCall = async (endpoint, data = {}) => {
     setLoading(true);
     try {
@@ -315,6 +315,5 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
     </div>
   );
 };
-
 
 export default AttendanceTracker;
