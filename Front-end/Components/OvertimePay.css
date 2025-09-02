@@ -1,346 +1,357 @@
-/* Reset and base styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Main container */
-.overtime-container {
+/* Layout with Sidebar */
+.overtime-layout {
+  display: flex;
   min-height: 100vh;
-  background-color: #f9fafb;
-  padding: 24px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
 }
 
-.overtime-wrapper {
-  max-width: 1280px;
-  margin: 0 auto;
+.overtime-main-content {
+  flex: 1;
+  margin-left: 280px; /* Account for fixed sidebar */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+  padding: 20px;
+  width: calc(100% - 280px);
+  box-sizing: border-box;
 }
 
 /* Page Header */
-.page-header {
-  margin-bottom: 32px;
+.overtime-page-header {
+  background-color: #f3f4f6;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+  border-radius: 8px;
 }
 
-.page-title {
-  font-size: 32px;
+.overtime-page-title {
+  font-size: 24px;
   font-weight: 700;
-  color: #111827;
-  margin-bottom: 8px;
-  line-height: 1.2;
+  color: #0C3D4A;
+  margin: 0;
 }
 
-.page-subtitle {
-  color: #6b7280;
-  font-size: 16px;
-  line-height: 1.5;
+.overtime-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Stats Grid */
-.stats-grid {
+.overtime-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-.stat-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  border: 1px solid #e5e7eb;
-  padding: 24px;
-  transition: all 0.2s ease;
-}
-
-.stat-card:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transform: translateY(-1px);
-}
-
-.stat-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.stat-info {
-  flex: 1;
-}
-
-.stat-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #6b7280;
-  margin-bottom: 4px;
-  text-transform: capitalize;
-}
-
-.stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #111827;
-  line-height: 1;
-}
-
-.stat-icon {
-  padding: 12px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stat-icon-blue {
-  background-color: #eff6ff;
-  color: #2563eb;
-}
-
-.stat-icon-green {
-  background-color: #f0fdf4;
-  color: #16a34a;
-}
-
-.stat-icon-orange {
-  background-color: #fff7ed;
-  color: #ea580c;
-}
-
-.stat-icon-purple {
-  background-color: #faf5ff;
-  color: #9333ea;
-}
-
-/* Filters Container - FIXED ALIGNMENT */
-.filters-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  border: 1px solid #e5e7eb;
-  padding: 24px;
-  margin-bottom: 32px;
-}
-
-.filters-wrapper {
-  display: flex;
-  flex-direction: row;
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-  align-items: center; /* Fixed alignment */
-  justify-content: space-between;
-  width: 100%;
+  margin-bottom: 30px;
 }
 
-.filters-left {
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  flex: 1;
-  align-items: center;
-}
-
-.search-container {
+.overtime-stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
   position: relative;
-  width: 280px;
-  flex-shrink: 0;
-  align-self: center; /* Ensures vertical alignment */
-}
-
-.search-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #9ca3af;
-  z-index: 10;
-  pointer-events: none;
-}
-
-.search-input {
-  width: 100%;
-  height: 42px;
-  padding: 12px 16px 12px 42px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  background: white;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-  display: block;
-}
-
-.search-input:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-  border-color: #3b82f6;
-}
-
-.search-input::placeholder {
-  color: #9ca3af;
-}
-
-.filter-selects {
-  display: flex;
-  gap: 12px;
-  flex-wrap: nowrap;
-  align-items: center;
-}
-
-.filter-select {
-  height: 42px;
-  padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: white;
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 150px;
-  box-sizing: border-box;
-}
-
-.filter-select:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-  border-color: #3b82f6;
-}
-
-.filter-select:hover {
-  border-color: #9ca3af;
-}
-
-.export-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 42px;
-  padding: 0 20px;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-  white-space: nowrap;
-  box-sizing: border-box;
-}
-
-.export-btn:hover {
-  background-color: #2563eb;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-/* Table Container - FIXED COLUMN ALIGNMENT */
-.table-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  border: 1px solid #e5e7eb;
   overflow: hidden;
 }
 
-.table-wrapper {
-  overflow-x: auto;
+.overtime-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.overtime-stat-card.stat-blue::before {
+  background: linear-gradient(135deg, #0C3D4A, #1a4f5e);
+}
+
+.overtime-stat-card.stat-green::before {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.overtime-stat-card.stat-yellow::before {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.overtime-stat-card.stat-red::before {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.overtime-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.overtime-stat-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.overtime-stat-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.overtime-stat-icon-main {
+  width: 48px;
+  height: 48px;
+  color: #0C3D4A;
+}
+
+.overtime-stat-card.stat-green .overtime-stat-icon-main {
+  color: #10b981;
+}
+
+.overtime-stat-card.stat-yellow .overtime-stat-icon-main {
+  color: #f59e0b;
+}
+
+.overtime-stat-card.stat-red .overtime-stat-icon-main {
+  color: #ef4444;
+}
+
+.overtime-stat-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.overtime-stat-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.overtime-stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #0C3D4A;
+  margin: 0;
+}
+
+/* Filters Container */
+.overtime-filters-container {
+  background-color: white;
+  padding: 24px;
   border-radius: 12px;
-  background: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+  margin-bottom: 24px;
+}
+
+.overtime-filters-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.overtime-search-filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.overtime-search-box {
+  display: flex;
+  align-items: center;
+  background-color: #f8f9fa;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  min-width: 300px;
+  flex: 1;
+  max-width: 400px;
+}
+
+.overtime-search-box:focus-within {
+  border-color: #0C3D4A;
+  box-shadow: 0 4px 12px rgba(12, 61, 74, 0.15);
+}
+
+.overtime-search-icon {
+  padding: 12px 16px;
+  color: #666;
+  background-color: #f8f9fa;
+  border-right: 1px solid #e2e8f0;
+  width: 20px;
+  height: 20px;
+}
+
+.overtime-search-input {
+  padding: 12px 16px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background-color: white;
+  color: #333;
+  flex: 1;
+  width: 100%;
+}
+
+.overtime-search-input::placeholder {
+  color: #999;
+}
+
+.overtime-filter-select {
+  padding: 12px 16px;
+  background-color: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 160px;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.overtime-filter-select:focus {
+  outline: none;
+  border-color: #0C3D4A;
+  box-shadow: 0 4px 12px rgba(12, 61, 74, 0.15);
+}
+
+.overtime-filter-select:hover {
+  border-color: #0C3D4A;
+}
+
+.overtime-export-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #0C3D4A, #1a4f5e);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(12, 61, 74, 0.3);
+}
+
+.overtime-export-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(12, 61, 74, 0.4);
+}
+
+.overtime-btn-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Overtime Table */
+.overtime-table-container {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.overtime-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .overtime-table {
   width: 100%;
+  min-width: 1200px;
   border-collapse: collapse;
-  background: white;
+  table-layout: auto;
 }
 
-.table-header {
-  background-color: #f9fafb;
-  border-bottom: 2px solid #e5e7eb;
+.overtime-table-header {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #e2e8f0;
 }
 
-/* Fixed column width percentages */
-.table-th:nth-child(1),
-.table-td:nth-child(1) { width: 22%; min-width: 180px; }  /* EMPLOYEE */
-.table-th:nth-child(2),
-.table-td:nth-child(2) { width: 10%; min-width: 90px; }   /* CLOCK IN */
-.table-th:nth-child(3),
-.table-td:nth-child(3) { width: 10%; min-width: 90px; }   /* CLOCK OUT */
-.table-th:nth-child(4),
-.table-td:nth-child(4) { width: 12%; min-width: 100px; }  /* REGULAR HOURS */
-.table-th:nth-child(5),
-.table-td:nth-child(5) { width: 10%; min-width: 80px; }   /* OT HOURS */
-.table-th:nth-child(6),
-.table-td:nth-child(6) { width: 12%; min-width: 100px; }  /* REGULAR PAY */
-.table-th:nth-child(7),
-.table-td:nth-child(7) { width: 12%; min-width: 100px; }  /* OT PAY */
-.table-th:nth-child(8),
-.table-td:nth-child(8) { width: 8%; min-width: 90px; }    /* STATUS */
-.table-th:nth-child(9),
-.table-td:nth-child(9) { width: 8%; min-width: 80px; }    /* LOCATION */
-
-.table-th {
+.overtime-table-th {
+  padding: 16px 12px;
   text-align: left;
-  padding: 16px;
-  font-weight: 600;
-  color: #111827;
   font-size: 12px;
+  font-weight: 600;
+  color: #666;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.5px;
   white-space: nowrap;
-  vertical-align: middle;
-  border-right: 1px solid #e5e7eb;
-  box-sizing: border-box;
+  border-right: 1px solid #f0f0f0;
 }
 
-.table-th:last-child {
+.overtime-table-th:last-child {
   border-right: none;
 }
 
-.table-body {
-  background: white;
+.overtime-table-body {
+  background-color: white;
 }
 
-.table-row {
-  border-bottom: 1px solid #f3f4f6;
-  transition: background-color 0.2s ease;
+.overtime-table-row {
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.2s ease;
 }
 
-.table-row:hover {
-  background-color: #f9fafb;
+.overtime-table-row:hover {
+  background-color: #f8f9fa;
 }
 
-.table-td {
-  padding: 16px;
-  vertical-align: middle;
+.overtime-table-td {
+  padding: 16px 12px;
   font-size: 14px;
-  border-bottom: 1px solid #f3f4f6;
-  border-right: 1px solid #f3f4f6;
-  box-sizing: border-box;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: #333;
+  vertical-align: middle;
+  border-right: 1px solid #f8f9fa;
   white-space: nowrap;
 }
 
-.table-td:last-child {
+.overtime-table-td:last-child {
   border-right: none;
 }
 
-.employee-info {
+.overtime-employee-info {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-width: 0;
-  width: 100%;
+  min-width: 220px;
 }
 
-.employee-avatar {
-  width: 32px;
-  height: 32px;
-  background-color: #dbeafe;
+.overtime-employee-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #E8F4F1, #B8E6D6);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -348,263 +359,249 @@
   flex-shrink: 0;
 }
 
-.avatar-text {
-  color: #1d4ed8;
-  font-weight: 600;
-  font-size: 12px;
-}
-
-.employee-details {
-  min-width: 0;
-  flex: 1;
-}
-
-.employee-name {
-  font-weight: 600;
-  color: #111827;
+.overtime-avatar-text {
   font-size: 14px;
-  margin-bottom: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 600;
+  color: #0C3D4A;
 }
 
-.employee-meta {
-  font-size: 11px;
-  color: #6b7280;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.table-time,
-.table-hours,
-.table-pay {
-  font-weight: 500;
-  color: #111827;
-}
-
-.overtime-hours.has-overtime {
-  font-weight: 700;
-  color: #ea580c;
-}
-
-.overtime-hours.no-overtime {
-  font-weight: 500;
-  color: #6b7280;
-}
-
-.overtime-pay.has-overtime {
-  font-weight: 700;
-  color: #16a34a;
-}
-
-.overtime-pay.no-overtime {
-  font-weight: 500;
-  color: #6b7280;
-}
-
-.location-info {
+.overtime-employee-details {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #6b7280;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.overtime-employee-name {
   font-size: 14px;
+  font-weight: 600;
+  color: #0C3D4A;
+  margin-bottom: 2px;
+}
+
+.overtime-employee-meta {
+  font-size: 12px;
+  color: #666;
+}
+
+.overtime-table-time {
+  font-weight: 500;
+  color: #333;
+  font-family: 'Courier New', monospace;
+  min-width: 80px;
+}
+
+.overtime-table-hours {
+  font-weight: 600;
+  color: #0C3D4A;
+  min-width: 70px;
+}
+
+.overtime-table-overtime {
+  font-weight: 600;
+  color: #f59e0b;
+  min-width: 70px;
+}
+
+.overtime-table-pay {
+  font-weight: 600;
+  color: #10b981;
+  min-width: 90px;
+}
+
+.overtime-table-overtime-pay {
+  font-weight: 700;
+  color: #ef4444;
+  background-color: #fef2f2;
+  padding: 4px 8px;
+  border-radius: 4px;
+  min-width: 100px;
+}
+
+.overtime-table-location {
+  color: #666;
+  min-width: 80px;
 }
 
 /* Status Badges */
-.status-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 9999px;
+.overtime-status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.025em;
-  white-space: nowrap;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  min-width: 80px;
+  text-align: center;
 }
 
-.status-badge.status-high {
-  background-color: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+.overtime-status-high {
+  background-color: #dc2626;
+  color: white;
 }
 
-.status-badge.status-medium {
-  background-color: #fff7ed;
-  color: #ea580c;
-  border: 1px solid #fed7aa;
+.overtime-status-medium {
+  background-color: #f59e0b;
+  color: white;
 }
 
-.status-badge.status-low {
-  background-color: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #bbf7d0;
+.overtime-status-low {
+  background-color: #10b981;
+  color: white;
 }
 
-.status-badge.status-none {
-  background-color: #f9fafb;
-  color: #6b7280;
-  border: 1px solid #e5e7eb;
+.overtime-status-none {
+  background-color: #6b7280;
+  color: white;
 }
 
 /* Empty State */
-.empty-state {
+.overtime-empty-state {
   text-align: center;
   padding: 48px 24px;
+  background-color: white;
 }
 
-.empty-icon {
-  color: #9ca3af;
-  margin-bottom: 16px;
-  display: flex;
-  justify-content: center;
-}
-
-.empty-title {
+.overtime-empty-title {
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: #666;
   margin-bottom: 8px;
 }
 
-.empty-description {
-  color: #6b7280;
+.overtime-empty-subtitle {
   font-size: 14px;
+  color: #999;
 }
 
 /* Pagination */
-.pagination-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  border: 1px solid #e5e7eb;
-  padding: 16px 24px;
-  margin-top: 24px;
+.overtime-pagination-container {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  padding: 20px 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
 }
 
-.pagination-info {
+.overtime-pagination-info {
   font-size: 14px;
-  color: #374151;
+  color: #666;
 }
 
-.pagination-highlight {
+.overtime-pagination-highlight {
   font-weight: 600;
-  color: #111827;
+  color: #0C3D4A;
 }
 
-.pagination-controls {
+.overtime-pagination-controls {
   display: flex;
   gap: 8px;
 }
 
-.pagination-btn {
-  padding: 8px 12px;
+.overtime-pagination-btn {
+  padding: 8px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: white;
+  color: #666;
   font-size: 14px;
   font-weight: 500;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: white;
-  color: #6b7280;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.pagination-btn:hover:not(.pagination-btn-disabled) {
-  border-color: #3b82f6;
-  color: #3b82f6;
-  transform: translateY(-1px);
+.overtime-pagination-btn:hover:not(.overtime-pagination-btn-disabled) {
+  border-color: #0C3D4A;
+  color: #0C3D4A;
 }
 
-.pagination-btn-active {
-  background-color: #3b82f6;
-  color: white !important;
-  border-color: #3b82f6;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+.overtime-pagination-btn-active {
+  background: linear-gradient(135deg, #0C3D4A, #1a4f5e);
+  color: white;
+  border-color: #0C3D4A;
 }
 
-.pagination-btn-disabled {
+.overtime-pagination-btn-disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Responsive Design */
-@media (max-width: 1024px) {
-  .filters-wrapper {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 20px;
+@media (max-width: 1200px) {
+  .overtime-main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  .overtime-container {
+    margin: 10px;
+    padding: 20px;
   }
 
-  .filters-left {
-    flex-direction: row;
+  .overtime-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
-    align-items: center;
-  }
-
-  .search-container {
-    width: 250px;
-  }
-
-  .filter-selects {
-    flex-wrap: wrap;
-  }
-
-  .filter-select {
-    flex: 1;
-    min-width: 130px;
   }
 }
 
 @media (max-width: 768px) {
-  .overtime-container {
-    padding: 16px;
+  .overtime-main-content {
+    padding: 10px;
   }
 
-  .page-title {
-    font-size: 24px;
-  }
-
-  .stats-grid {
+  .overtime-stats-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
   }
-
-  .stat-value {
-    font-size: 24px;
-  }
-
-  .filters-left {
+  
+  .overtime-filters-row {
     flex-direction: column;
+    gap: 16px;
     align-items: stretch;
   }
-
-  .search-container {
+  
+  .overtime-search-filters {
     width: 100%;
+    justify-content: stretch;
+    flex-wrap: wrap;
   }
-
-  .filter-selects {
-    flex-direction: column;
-  }
-
-  .filter-select {
+  
+  .overtime-search-box {
     min-width: auto;
-    width: 100%;
+    max-width: none;
   }
-
-  .table-th,
-  .table-td {
+  
+  .overtime-filter-select {
+    min-width: 140px;
+  }
+  
+  .overtime-table {
+    min-width: 1000px;
+  }
+  
+  .overtime-table-th,
+  .overtime-table-td {
     padding: 12px 8px;
+    font-size: 12px;
   }
-
-  .table-th {
-    font-size: 11px;
+  
+  .overtime-employee-info {
+    gap: 8px;
+    min-width: 180px;
   }
-
-  .pagination-container {
+  
+  .overtime-employee-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .overtime-avatar-text {
+    font-size: 12px;
+  }
+  
+  .overtime-pagination-container {
     flex-direction: column;
     gap: 16px;
     text-align: center;
@@ -613,34 +610,53 @@
 
 @media (max-width: 480px) {
   .overtime-container {
-    padding: 12px;
+    padding: 16px;
+    margin: 4px;
   }
-
-  .page-title {
-    font-size: 20px;
-  }
-
-  .stat-card {
+  
+  .overtime-stat-card {
     padding: 16px;
   }
-
-  .filters-container {
+  
+  .overtime-stat-icon-main {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .overtime-stat-value {
+    font-size: 24px;
+  }
+  
+  .overtime-filters-container {
     padding: 16px;
   }
-
-  .search-container {
-    max-width: none;
+  
+  .overtime-table {
+    min-width: 900px;
   }
-
-  .employee-info {
-    min-width: 160px;
-  }
-
-  .employee-name {
-    font-size: 13px;
-  }
-
-  .employee-meta {
+  
+  .overtime-table-th,
+  .overtime-table-td {
+    padding: 8px 6px;
     font-size: 11px;
+  }
+  
+  .overtime-employee-name {
+    font-size: 12px;
+  }
+  
+  .overtime-employee-meta {
+    font-size: 10px;
+  }
+  
+  .overtime-status-badge {
+    font-size: 10px;
+    padding: 4px 8px;
+    min-width: 70px;
+  }
+
+  .overtime-table-overtime-pay {
+    padding: 2px 4px;
+    min-width: 80px;
   }
 }
