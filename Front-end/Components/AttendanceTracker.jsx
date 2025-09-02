@@ -1,26 +1,66 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Play, Pause, Square, RotateCcw } from 'lucide-react';
+import { Clock, Play, Pause, Square, RotateCcw, Wifi, WifiOff } from 'lucide-react';
 
 const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
   const [currentAttendance, setCurrentAttendance] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sessionTime, setSessionTime] = useState('00:00:00');
+  const [apiTimeAvailable, setApiTimeAvailable] = useState(true);
+  const [timeOffset, setTimeOffset] = useState(0); // Offset between API time and system time
+
+  // Fetch real-time from WorldTimeAPI
+  const fetchApiTime = async () => {
+    try {
+      const response = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC');
+      if (response.ok) {
+        const data = await response.json();
+        const apiTime = new Date(data.datetime);
+        const systemTime = new Date();
+        setTimeOffset(apiTime.getTime() - systemTime.getTime());
+        setApiTimeAvailable(true);
+        return apiTime;
+      }
+    } catch (error) {
+      console.warn('API time unavailable, using system time:', error);
+      setApiTimeAvailable(false);
+      return new Date();
+    }
+  };
+
+  // Get current accurate time
+  const getCurrentTime = () => {
+    const systemTime = new Date();
+    return new Date(systemTime.getTime() + timeOffset);
+  };
 
   // Update current time every second
   useEffect(() => {
+    // Initial API time fetch
+    fetchApiTime().then(apiTime => {
+      setCurrentTime(apiTime);
+    });
+
     const timer = setInterval(() => {
-      setCurrentTime(new Date());
+      setCurrentTime(getCurrentTime());
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, []);
+    // Refresh API time every 5 minutes to maintain accuracy
+    const apiRefreshTimer = setInterval(() => {
+      fetchApiTime();
+    }, 5 * 60 * 1000);
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(apiRefreshTimer);
+    };
+  }, [timeOffset]);
 
   // Calculate session time if checked in
   useEffect(() => {
     if (currentAttendance?.checkInTime && !currentAttendance?.checkOutTime) {
       const checkInTime = new Date(currentAttendance.checkInTime);
-      const now = new Date();
+      const now = getCurrentTime();
       
       // If on break, calculate up to break start
       let endTime = now;
@@ -68,17 +108,24 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
     fetchCurrentAttendance();
   }, [employeeId]);
 
-  // Handle API calls
+  // Handle API calls with real-time timestamp
   const makeAttendanceCall = async (endpoint, data = {}) => {
     setLoading(true);
     try {
+      // Use API time for accurate timestamps
+      const accurateTime = getCurrentTime();
+      
       const response = await fetch(`http://localhost:5000/api/attendance/${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         credentials: 'include',
-        body: JSON.stringify({ employeeId: parseInt(employeeId), ...data })
+        body: JSON.stringify({ 
+          employeeId: parseInt(employeeId), 
+          timestamp: accurateTime.toISOString(),
+          ...data 
+        })
       });
 
       const result = await response.json();
@@ -179,8 +226,18 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
         <Clock className="header-icon" />
         <h3>Real-time Attendance Tracker</h3>
         <div className="current-time">
-          <span className="time-label">Current Time</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <span className="time-label">Current Time</span>
+            {apiTimeAvailable ? (
+              <Wifi size={16} color="#10b981" title="API Time - Accurate" />
+            ) : (
+              <WifiOff size={16} color="#ef4444" title="System Time - Fallback" />
+            )}
+          </div>
           <span className="time-display">{currentTime.toLocaleTimeString()}</span>
+          <div style={{ fontSize: '10px', color: '#666', marginTop: '2px' }}>
+            {apiTimeAvailable ? 'API Synced' : 'System Fallback'}
+          </div>
         </div>
       </div>
 
