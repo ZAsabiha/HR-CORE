@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Play, Pause, Square, RotateCcw, Wifi, WifiOff } from 'lucide-react';
+import { Clock, Play, Pause, Square, AlertTriangle, CheckCircle, Wifi, WifiOff } from 'lucide-react';
 
 const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
   const [currentAttendance, setCurrentAttendance] = useState(null);
@@ -7,7 +7,18 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sessionTime, setSessionTime] = useState('00:00:00');
   const [apiTimeAvailable, setApiTimeAvailable] = useState(true);
-  const [timeOffset, setTimeOffset] = useState(0); // Offset between API time and system time
+  const [timeOffset, setTimeOffset] = useState(0);
+  const [autoCheckoutWarning, setAutoCheckoutWarning] = useState(false);
+
+  // BUSINESS RULES
+  const BUSINESS_CONFIG = {
+    STANDARD_WORK_HOURS: 8,
+    MAX_OVERTIME_HOURS: 4,
+    MAX_TOTAL_HOURS: 12, // 8 + 4 = 12 hours maximum per day
+    WORK_START_TIME: '09:00', // 9 AM
+    AUTO_CHECKOUT_TIME: '21:00', // 9 PM (9 AM + 12 hours)
+    LATE_THRESHOLD_MINUTES: 15 // Late if more than 15 min after work start
+  };
 
   // Fetch real-time from WorldTimeAPI
   const fetchApiTime = async () => {
@@ -34,18 +45,59 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
     return new Date(systemTime.getTime() + timeOffset);
   };
 
-  // Update current time every second
+  // Check if auto-checkout is needed
+  const checkAutoCheckout = async () => {
+    if (!currentAttendance?.checkInTime || currentAttendance?.checkOutTime) {
+      return;
+    }
+
+    const checkInTime = new Date(currentAttendance.checkInTime);
+    const now = getCurrentTime();
+    const hoursWorked = (now - checkInTime) / (1000 * 60 * 60);
+
+    // Auto-checkout if worked more than max hours
+    if (hoursWorked >= BUSINESS_CONFIG.MAX_TOTAL_HOURS) {
+      setAutoCheckoutWarning(true);
+      setTimeout(async () => {
+        await handleAutoCheckout();
+        setAutoCheckoutWarning(false);
+      }, 3000); // 3 second warning before auto-checkout
+    }
+  };
+
+  // Handle automatic checkout
+  const handleAutoCheckout = async () => {
+    try {
+      const result = await makeAttendanceCall('checkout', { 
+        isAutoCheckout: true,
+        reason: 'Maximum work hours exceeded' 
+      });
+      
+      if (result.success) {
+        alert(`Auto check-out completed! You've reached the maximum ${BUSINESS_CONFIG.MAX_TOTAL_HOURS}-hour work limit.`);
+      }
+    } catch (error) {
+      console.error('Auto checkout failed:', error);
+    }
+  };
+
+  // Update current time every second and check for auto-checkout
   useEffect(() => {
-    // Initial API time fetch
     fetchApiTime().then(apiTime => {
       setCurrentTime(apiTime);
     });
 
     const timer = setInterval(() => {
-      setCurrentTime(getCurrentTime());
+      const newTime = getCurrentTime();
+      setCurrentTime(newTime);
+      
+      // Check for auto-checkout every minute
+      if (newTime.getSeconds() === 0) {
+        checkAutoCheckout();
+      }
     }, 1000);
 
-    // Refresh API time every 5 minutes to maintain accuracy
+    // Refresh API time every 5 minutes
     const apiRefreshTimer = setInterval(() => {
       fetchApiTime();
     }, 5 * 60 * 1000);
@@ -54,29 +106,26 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
       clearInterval(timer);
       clearInterval(apiRefreshTimer);
     };
-  }, [timeOffset]);
+  }, [timeOffset, currentAttendance]);
 
-  // Calculate session time if checked in
+  // Calculate session time with business logic
   useEffect(() => {
     if (currentAttendance?.checkInTime && !currentAttendance?.checkOutTime) {
       const checkInTime = new Date(currentAttendance.checkInTime);
       const now = getCurrentTime();
       
-      // If on break, calculate up to break start
       let endTime = now;
       if (currentAttendance.status === 'ON_BREAK' && currentAttendance.breakStart) {
         endTime = new Date(currentAttendance.breakStart);
       }
       
       const diff = endTime - checkInTime;
-      
-      // Subtract any completed break time
       let breakTime = 0;
       if (currentAttendance.breakMinutes) {
         breakTime = currentAttendance.breakMinutes * 60 * 1000;
       }
       
-      const workingDiff = diff - breakTime;
+      const workingDiff = Math.max(0, diff - breakTime);
       
       const hours = Math.floor(workingDiff / (1000 * 60 * 60));
       const minutes = Math.floor((workingDiff % (1000 * 60 * 60)) / (1000 * 60));
@@ -88,12 +137,13 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
     }
   }, [currentTime, currentAttendance]);
 
-  // Fetch current attendance status
+  // Fetch current attendance status with date validation
   const fetchCurrentAttendance = async () => {
     if (!employeeId) return;
     
     try {
-      const response = await fetch(`http://localhost:5000/api/attendance/current/${employeeId}`, {
+      const today = getCurrentTime().toISOString().split('T')[0];
+      const response = await fetch(`http://localhost:5000/api/attendance/current/${employeeId}?date=${today}`, {
         credentials: 'include'
       });
       const data = await response.json();
@@ -103,16 +153,77 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
     }
   };
 
-  // Load current attendance on component mount
+  // Auto-refresh attendance data when date changes
   useEffect(() => {
-    fetchCurrentAttendance();
+    const checkDateChange = () => {
+      const now = getCurrentTime();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0); // Next midnight
+      
+      const timeToMidnight = midnight - now;
+      
+      // Set timeout to refresh at midnight
+      setTimeout(() => {
+        fetchCurrentAttendance();
+        onAttendanceUpdate && onAttendanceUpdate();
+      }, timeToMidnight);
+    };
+
+    if (employeeId) {
+      fetchCurrentAttendance();
+      checkDateChange();
+    }
   }, [employeeId]);
 
-  // Handle API calls with real-time timestamp
+  // Validate business rules before API calls
+  const validateAttendanceAction = (action) => {
+    const now = getCurrentTime();
+    
+    switch (action) {
+      case 'checkin':
+        if (currentAttendance?.checkInTime && !currentAttendance?.checkOutTime) {
+          return { valid: false, error: 'Already checked in today. Please check out first.' };
+        }
+        break;
+        
+      case 'checkout':
+        if (!currentAttendance?.checkInTime) {
+          return { valid: false, error: 'Cannot check out without checking in first.' };
+        }
+        if (currentAttendance?.checkOutTime) {
+          return { valid: false, error: 'Already checked out today.' };
+        }
+        break;
+        
+      case 'break':
+        if (!currentAttendance?.checkInTime) {
+          return { valid: false, error: 'Cannot take break without checking in first.' };
+        }
+        if (currentAttendance?.checkOutTime) {
+          return { valid: false, error: 'Cannot take break after checking out.' };
+        }
+        if (currentAttendance?.status === 'ON_BREAK') {
+          return { valid: false, error: 'Already on break.' };
+        }
+        break;
+        
+      default:
+        break;
+    }
+    
+    return { valid: true };
+  };
+
+  // Handle API calls with business rule validation
   const makeAttendanceCall = async (endpoint, data = {}) => {
+    const validation = validateAttendanceAction(endpoint.split('/')[0]);
+    if (!validation.valid) {
+      alert(validation.error);
+      return { success: false, error: validation.error };
+    }
+
     setLoading(true);
     try {
-      // Use API time for accurate timestamps
       const accurateTime = getCurrentTime();
       
       const response = await fetch(`http://localhost:5000/api/attendance/${endpoint}`, {
@@ -124,6 +235,7 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
         body: JSON.stringify({ 
           employeeId: parseInt(employeeId), 
           timestamp: accurateTime.toISOString(),
+          businessConfig: BUSINESS_CONFIG,
           ...data 
         })
       });
@@ -148,7 +260,8 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
   const handleCheckIn = async () => {
     const result = await makeAttendanceCall('checkin');
     if (result.success) {
-      alert(`Check-in successful!${result.data.isLate ? ' (Late arrival noted)' : ''}`);
+      const message = `Check-in successful!${result.data.isLate ? ' (Late arrival noted)' : ''}`;
+      alert(message);
     } else {
       alert(result.error || 'Check-in failed');
     }
@@ -204,6 +317,30 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
     return { class: config.class, label: config.label };
   };
 
+  // Calculate hours worked for progress indication
+  const getWorkProgress = () => {
+    if (!currentAttendance?.checkInTime || currentAttendance?.checkOutTime) {
+      return { hours: 0, percentage: 0, overtimeHours: 0 };
+    }
+
+    const checkInTime = new Date(currentAttendance.checkInTime);
+    const now = getCurrentTime();
+    const totalMs = now - checkInTime;
+    const breakMs = (currentAttendance.breakMinutes || 0) * 60 * 1000;
+    const workMs = Math.max(0, totalMs - breakMs);
+    const hoursWorked = workMs / (1000 * 60 * 60);
+    
+    const regularHours = Math.min(hoursWorked, BUSINESS_CONFIG.STANDARD_WORK_HOURS);
+    const overtimeHours = Math.max(0, hoursWorked - BUSINESS_CONFIG.STANDARD_WORK_HOURS);
+    
+    return {
+      hours: hoursWorked,
+      regularHours,
+      overtimeHours,
+      percentage: (hoursWorked / BUSINESS_CONFIG.MAX_TOTAL_HOURS) * 100
+    };
+  };
+
   if (!employeeId) {
     return (
       <div className="attendance-tracker-card">
@@ -219,12 +356,35 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
   }
 
   const statusBadge = currentAttendance?.status ? getStatusBadge(currentAttendance.status) : null;
+  const workProgress = getWorkProgress();
 
   return (
     <div className="attendance-tracker-card">
+      {/* Auto-checkout warning */}
+      {autoCheckoutWarning && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          background: '#fee2e2',
+          border: '2px solid #fecaca',
+          borderRadius: '8px',
+          padding: '16px',
+          zIndex: 1000,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#dc2626' }}>
+            <AlertTriangle size={20} />
+            <span style={{ fontWeight: '600' }}>
+              Auto check-out in 3 seconds - Maximum work hours exceeded!
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="tracker-header">
         <Clock className="header-icon" />
-        <h3>Real-time Attendance Tracker</h3>
+        <h3>Smart Attendance Tracker</h3>
         <div className="current-time">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
             <span className="time-label">Current Time</span>
@@ -236,7 +396,7 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
           </div>
           <span className="time-display">{currentTime.toLocaleTimeString()}</span>
           <div style={{ fontSize: '10px', color: '#666', marginTop: '2px' }}>
-            {apiTimeAvailable ? 'API Synced' : 'System Fallback'}
+            Max: {BUSINESS_CONFIG.MAX_TOTAL_HOURS}h/day
           </div>
         </div>
       </div>
@@ -266,6 +426,33 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
                 <span>Session Time:</span>
                 <span className="session-time">{sessionTime}</span>
               </div>
+              
+              {/* Work progress indicator */}
+              {!currentAttendance.checkOutTime && currentAttendance.checkInTime && (
+                <div className="time-row">
+                  <span>Progress:</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '100px',
+                      height: '6px',
+                      backgroundColor: '#e5e7eb',
+                      borderRadius: '3px',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{
+                        width: `${Math.min(workProgress.percentage, 100)}%`,
+                        height: '100%',
+                        backgroundColor: workProgress.overtimeHours > 0 ? '#f59e0b' : '#10b981',
+                        transition: 'width 0.3s ease'
+                      }} />
+                    </div>
+                    <span style={{ fontSize: '12px', color: '#666' }}>
+                      {workProgress.hours.toFixed(1)}h
+                    </span>
+                  </div>
+                </div>
+              )}
+              
               {currentAttendance.totalHours && (
                 <div className="time-row">
                   <span>Total Hours:</span>
@@ -353,21 +540,10 @@ const AttendanceTracker = ({ employeeId, onAttendanceUpdate }) => {
           </div>
         ) : (
           <div className="completed-message">
-            <span className="check-icon">✅</span>
+            <CheckCircle className="check-icon" color="#10b981" size={24} />
             <span>Attendance completed for today</span>
           </div>
         )}
-      </div>
-
-      <div className="refresh-section">
-        <button 
-          className="tracker-btn btn-refresh"
-          onClick={fetchCurrentAttendance}
-          disabled={loading}
-        >
-          <RotateCcw className="btn-icon" />
-          Refresh Status
-        </button>
       </div>
     </div>
   );
