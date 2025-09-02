@@ -17,8 +17,11 @@ const AttendanceLogs = () => {
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({});
   const [stats, setStats] = useState({ total: 0, present: 0, absent: 0, late: 0 });
+  
+  // Key for forcing re-render of AttendanceTracker
+  const [trackerKey, setTrackerKey] = useState(0);
 
-  // Fetch employees for dropdown - USING YOUR ORIGINAL ENDPOINT
+  // Fetch employees for dropdown
   const fetchEmployees = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/employees', {
@@ -37,7 +40,7 @@ const AttendanceLogs = () => {
     }
   };
 
-  // Fetch attendance logs - USING YOUR ORIGINAL ENDPOINT
+  // Fetch attendance logs
   const fetchAttendanceLogs = async () => {
     setLoading(true);
     try {
@@ -103,13 +106,14 @@ const AttendanceLogs = () => {
 
   const getStatusBadge = (status) => {
     const statusClasses = {
-      PRESENT: 'status-present',
-      LATE: 'status-late', 
-      ABSENT: 'status-absent',
-      EARLY_DEPARTURE: 'status-early',
-      OVERTIME: 'status-overtime',
-      HALF_DAY: 'status-early',
-      ON_BREAK: 'status-late'
+      PRESENT: 'attendance-status-present',
+      LATE: 'attendance-status-late', 
+      ABSENT: 'attendance-status-absent',
+      EARLY_DEPARTURE: 'attendance-status-early',
+      OVERTIME: 'attendance-status-overtime',
+      HALF_DAY: 'attendance-status-half-day',
+      ON_BREAK: 'attendance-status-on-break',
+      PENDING: 'attendance-status-pending'
     };
     
     const statusLabels = {
@@ -119,11 +123,12 @@ const AttendanceLogs = () => {
       EARLY_DEPARTURE: 'Early Out',
       OVERTIME: 'Overtime',
       HALF_DAY: 'Half Day',
-      ON_BREAK: 'On Break'
+      ON_BREAK: 'On Break',
+      PENDING: 'Pending'
     };
     
     return (
-      <span className={`status-badge ${statusClasses[status] || statusClasses.PRESENT}`}>
+      <span className={`attendance-status-badge ${statusClasses[status] || statusClasses.PRESENT}`}>
         {statusLabels[status] || 'Present'}
       </span>
     );
@@ -170,18 +175,19 @@ const AttendanceLogs = () => {
   };
 
   const handleAttendanceUpdate = () => {
-    // Refresh logs when attendance is updated
+    // Refresh logs when attendance is updated and force tracker re-render
     fetchAttendanceLogs();
+    setTrackerKey(prev => prev + 1);
   };
 
   return (
-    <div className="attendance-layout">
-      <div className="attendance-main-content">
-        <div className="attendance-container">
+    <div className="attendance-logs-layout">
+      <div className="attendance-logs-main-content">
+        <div className="attendance-logs-container">
           
           {/* Attendance Tracker Section */}
-          <div className="tracker-section" style={{ marginBottom: '24px' }}>
-            <div className="employee-selector" style={{ marginBottom: '16px' }}>
+          <div className="attendance-tracker-section" style={{ marginBottom: '24px' }}>
+            <div className="attendance-employee-selector" style={{ marginBottom: '16px' }}>
               <label htmlFor="employee-select" style={{ 
                 display: 'block', 
                 marginBottom: '8px', 
@@ -194,7 +200,7 @@ const AttendanceLogs = () => {
                 id="employee-select"
                 value={selectedEmployee}
                 onChange={(e) => setSelectedEmployee(e.target.value)}
-                className="filter-select"
+                className="attendance-filter-select"
                 style={{ minWidth: '300px' }}
               >
                 <option value="">-- Select Employee --</option>
@@ -207,53 +213,54 @@ const AttendanceLogs = () => {
             </div>
 
             <AttendanceTracker 
+              key={trackerKey}
               employeeId={selectedEmployee}
               onAttendanceUpdate={handleAttendanceUpdate}
             />
           </div>
 
           {/* Stats Cards */}
-          <div className="stats-grid">
-            <div className="stat-card stat-blue">
-              <div className="stat-content">
-                <div className="stat-info">
-                  <Users className="stat-icon-main" />
-                  <div className="stat-details">
-                    <p className="stat-title">Total Employees</p>
-                    <p className="stat-value">{stats.total}</p>
+          <div className="attendance-stats-grid">
+            <div className="attendance-stat-card attendance-stat-blue">
+              <div className="attendance-stat-content">
+                <div className="attendance-stat-info">
+                  <Users className="attendance-stat-icon-main" />
+                  <div className="attendance-stat-details">
+                    <p className="attendance-stat-title">Total Employees</p>
+                    <p className="attendance-stat-value">{stats.total}</p>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="stat-card stat-green">
-              <div className="stat-content">
-                <div className="stat-info">
-                  <Clock className="stat-icon-main" />
-                  <div className="stat-details">
-                    <p className="stat-title">Present</p>
-                    <p className="stat-value">{stats.present}</p>
+            <div className="attendance-stat-card attendance-stat-green">
+              <div className="attendance-stat-content">
+                <div className="attendance-stat-info">
+                  <Clock className="attendance-stat-icon-main" />
+                  <div className="attendance-stat-details">
+                    <p className="attendance-stat-title">Present</p>
+                    <p className="attendance-stat-value">{stats.present}</p>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="stat-card stat-yellow">
-              <div className="stat-content">
-                <div className="stat-info">
-                  <TrendingUp className="stat-icon-main" />
-                  <div className="stat-details">
-                    <p className="stat-title">Late Arrivals</p>
-                    <p className="stat-value">{stats.late}</p>
+            <div className="attendance-stat-card attendance-stat-yellow">
+              <div className="attendance-stat-content">
+                <div className="attendance-stat-info">
+                  <TrendingUp className="attendance-stat-icon-main" />
+                  <div className="attendance-stat-details">
+                    <p className="attendance-stat-title">Late Arrivals</p>
+                    <p className="attendance-stat-value">{stats.late}</p>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="stat-card stat-red">
-              <div className="stat-content">
-                <div className="stat-info">
-                  <Eye className="stat-icon-main" />
-                  <div className="stat-details">
-                    <p className="stat-title">Absent</p>
-                    <p className="stat-value">{stats.absent}</p>
+            <div className="attendance-stat-card attendance-stat-red">
+              <div className="attendance-stat-content">
+                <div className="attendance-stat-info">
+                  <Eye className="attendance-stat-icon-main" />
+                  <div className="attendance-stat-details">
+                    <p className="attendance-stat-title">Absent</p>
+                    <p className="attendance-stat-value">{stats.absent}</p>
                   </div>
                 </div>
               </div>
@@ -261,21 +268,21 @@ const AttendanceLogs = () => {
           </div>
 
           {/* Filters and Controls */}
-          <div className="filters-container">
-            <div className="filters-row">
-              <div className="search-filters">
-                <div className="search-box">
-                  <Search className="search-icon" />
+          <div className="attendance-filters-container">
+            <div className="attendance-filters-row">
+              <div className="attendance-search-filters">
+                <div className="attendance-search-box">
+                  <Search className="attendance-search-icon" />
                   <input
                     type="text"
                     placeholder="Search employees..."
-                    className="search-input"
+                    className="attendance-search-input"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
                 <select
-                  className="filter-select"
+                  className="attendance-filter-select"
                   value={dateRange}
                   onChange={(e) => setDateRange(e.target.value)}
                 >
@@ -286,7 +293,7 @@ const AttendanceLogs = () => {
                   <option value="this_month">This Month</option>
                 </select>
                 <select
-                  className="filter-select"
+                  className="attendance-filter-select"
                   value={selectedDepartment}
                   onChange={(e) => setSelectedDepartment(e.target.value)}
                 >
@@ -297,7 +304,7 @@ const AttendanceLogs = () => {
                   ))}
                 </select>
                 <select
-                  className="filter-select"
+                  className="attendance-filter-select"
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
                 >
@@ -310,8 +317,8 @@ const AttendanceLogs = () => {
                   <option value="OVERTIME">Overtime</option>
                 </select>
               </div>
-              <button onClick={handleExport} className="export-btn" disabled={loading}>
-                <Download className="btn-icon" />
+              <button onClick={handleExport} className="attendance-export-btn" disabled={loading}>
+                <Download className="attendance-btn-icon" />
                 Export
               </button>
             </div>
@@ -319,7 +326,7 @@ const AttendanceLogs = () => {
 
           {/* Attendance Table */}
           <div className="attendance-table-container">
-            <div className="table-wrapper">
+            <div className="attendance-table-wrapper">
               {loading ? (
                 <div style={{ 
                   padding: '40px', 
@@ -330,43 +337,43 @@ const AttendanceLogs = () => {
                 </div>
               ) : (
                 <table className="attendance-table">
-                  <thead className="table-header">
+                  <thead className="attendance-table-header">
                     <tr>
-                      <th className="table-th">Employee</th>
-                      <th className="table-th">Date</th>
-                      <th className="table-th">Clock In</th>
-                      <th className="table-th">Clock Out</th>
-                      <th className="table-th">Total Hours</th>
-                      <th className="table-th">Break</th>
-                      <th className="table-th">Status</th>
-                      <th className="table-th">Location</th>
+                      <th className="attendance-table-th">Employee</th>
+                      <th className="attendance-table-th">Date</th>
+                      <th className="attendance-table-th">Clock In</th>
+                      <th className="attendance-table-th">Clock Out</th>
+                      <th className="attendance-table-th">Total Hours</th>
+                      <th className="attendance-table-th">Break</th>
+                      <th className="attendance-table-th">Status</th>
+                      <th className="attendance-table-th">Location</th>
                     </tr>
                   </thead>
-                  <tbody className="table-body">
+                  <tbody className="attendance-table-body">
                     {filteredData.map(record => (
-                      <tr key={record.id} className="table-row">
-                        <td className="table-td">
-                          <div className="employee-info">
-                            <div className="employee-avatar">
-                              <span className="avatar-text">
+                      <tr key={record.id} className="attendance-table-row">
+                        <td className="attendance-table-td">
+                          <div className="attendance-employee-info">
+                            <div className="attendance-employee-avatar">
+                              <span className="attendance-avatar-text">
                                 {record.employee?.name?.split(' ').map(n => n[0]).join('') || 'NA'}
                               </span>
                             </div>
-                            <div className="employee-details">
-                              <div className="employee-name">{record.employee?.name || 'Unknown'}</div>
-                              <div className="employee-meta">
+                            <div className="attendance-employee-details">
+                              <div className="attendance-employee-name">{record.employee?.name || 'Unknown'}</div>
+                              <div className="attendance-employee-meta">
                                 {record.employee?.email} • {record.employee?.department?.name}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="table-td">{new Date(record.date).toLocaleDateString()}</td>
-                        <td className="table-td table-time">{formatTime(record.checkInTime)}</td>
-                        <td className="table-td table-time">{formatTime(record.checkOutTime)}</td>
-                        <td className="table-td table-hours">{formatHours(record.totalHours)}</td>
-                        <td className="table-td table-break">{record.breakMinutes || 0}m</td>
-                        <td className="table-td">{getStatusBadge(record.status)}</td>
-                        <td className="table-td table-location">{record.location || 'Office'}</td>
+                        <td className="attendance-table-td">{new Date(record.date).toLocaleDateString()}</td>
+                        <td className="attendance-table-td attendance-table-time">{formatTime(record.checkInTime)}</td>
+                        <td className="attendance-table-td attendance-table-time">{formatTime(record.checkOutTime)}</td>
+                        <td className="attendance-table-td attendance-table-hours">{formatHours(record.totalHours)}</td>
+                        <td className="attendance-table-td attendance-table-break">{record.breakMinutes || 0}m</td>
+                        <td className="attendance-table-td">{getStatusBadge(record.status)}</td>
+                        <td className="attendance-table-td attendance-table-location">{record.location || 'Office'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -374,27 +381,27 @@ const AttendanceLogs = () => {
               )}
             </div>
             {!loading && filteredData.length === 0 && (
-              <div className="empty-state">
-                <div className="empty-title">No attendance records found</div>
-                <div className="empty-subtitle">Try adjusting your search or filter criteria</div>
+              <div className="attendance-empty-state">
+                <div className="attendance-empty-title">No attendance records found</div>
+                <div className="attendance-empty-subtitle">Try adjusting your search or filter criteria</div>
               </div>
             )}
           </div>
 
           {/* Pagination */}
           {filteredData.length > 0 && (
-            <div className="pagination-container">
-              <div className="pagination-info">
-                Showing <span className="pagination-highlight">1</span> to{' '}
-                <span className="pagination-highlight">{filteredData.length}</span> of{' '}
-                <span className="pagination-highlight">{pagination.total || filteredData.length}</span> results
+            <div className="attendance-pagination-container">
+              <div className="attendance-pagination-info">
+                Showing <span className="attendance-pagination-highlight">1</span> to{' '}
+                <span className="attendance-pagination-highlight">{filteredData.length}</span> of{' '}
+                <span className="attendance-pagination-highlight">{pagination.total || filteredData.length}</span> results
               </div>
-              <div className="pagination-controls">
-                <button className="pagination-btn pagination-btn-disabled" disabled>
+              <div className="attendance-pagination-controls">
+                <button className="attendance-pagination-btn attendance-pagination-btn-disabled" disabled>
                   Previous
                 </button>
-                <button className="pagination-btn pagination-btn-active">1</button>
-                <button className="pagination-btn pagination-btn-disabled" disabled>
+                <button className="attendance-pagination-btn attendance-pagination-btn-active">1</button>
+                <button className="attendance-pagination-btn attendance-pagination-btn-disabled" disabled>
                   Next
                 </button>
               </div>
