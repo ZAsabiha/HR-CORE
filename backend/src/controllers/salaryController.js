@@ -62,6 +62,199 @@ export const updateSalary = async (req, res) => {
   }
 };
 
+
+// Add this function to your existing salaryController.js
+
+// export const getCurrentSalary = async (req, res) => {
+//   const { employeeId } = req.query;
+  
+//   if (!employeeId) {
+//     return res.status(400).json({ success: false, message: 'Employee ID is required' });
+//   }
+
+//   try {
+//     // Get employee details with latest salary record
+//     const employee = await prisma.employee.findUnique({
+//       where: { id: Number(employeeId) },
+//       select: {
+//         id: true,
+//         name: true,
+//         email: true,
+//         salary: true,
+//         position: true,
+//         department: { select: { name: true } },
+//         salaries: {
+//           orderBy: { createdAt: 'desc' },
+//           take: 1,
+//           select: {
+//             id: true,
+//             baseSalary: true,
+//             allowances: true,
+//             deductions: true,
+//             payDate: true,
+//             overtimeHours: true,
+//             createdAt: true
+//           }
+//         }
+//       }
+//     });
+
+//     if (!employee) {
+//       return res.status(404).json({ success: false, message: 'Employee not found' });
+//     }
+
+//     // Get the latest salary record or use employee base salary
+//     const latestSalary = employee.salaries[0];
+    
+//     const currentSalaryData = {
+//       employeeId: employee.id,
+//       employeeName: employee.name,
+//       employeeEmail: employee.email,
+//       position: employee.position,
+//       department: employee.department.name,
+//       baseSalary: latestSalary ? latestSalary.baseSalary : employee.salary,
+//       allowances: latestSalary ? latestSalary.allowances : 0,
+//       deductions: latestSalary ? latestSalary.deductions : 0,
+//       overtimeHours: latestSalary ? latestSalary.overtimeHours : 0,
+//       lastUpdated: latestSalary ? latestSalary.createdAt : null,
+//       hasHistory: !!latestSalary
+//     };
+
+//     res.json({ success: true, data: currentSalaryData });
+//   } catch (err) {
+//     console.error('Get current salary error:', err);
+//     res.status(500).json({ success: false, message: 'Failed to fetch current salary data' });
+//   }
+// };
+
+
+// Add this function to your existing salaryController.js
+
+export const getCurrentSalary = async (req, res) => {
+  const { employeeId } = req.query;
+  
+  if (!employeeId) {
+    return res.status(400).json({ success: false, message: 'Employee ID is required' });
+  }
+
+  try {
+    // Get employee details with latest salary record
+    const employee = await prisma.employee.findUnique({
+      where: { id: Number(employeeId) },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        salary: true,
+        position: true,
+        department: { select: { name: true } },
+        salaries: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: {
+            id: true,
+            baseSalary: true,
+            allowances: true,
+            deductions: true,
+            payDate: true,
+            overtimeHours: true,
+            createdAt: true
+          }
+        }
+      }
+    });
+
+    if (!employee) {
+      return res.status(404).json({ success: false, message: 'Employee not found' });
+    }
+
+    // Get the latest salary record or use employee base salary
+    const latestSalary = employee.salaries[0];
+    
+    const currentSalaryData = {
+      employeeId: employee.id,
+      employeeName: employee.name,
+      employeeEmail: employee.email,
+      position: employee.position,
+      department: employee.department.name,
+      baseSalary: latestSalary ? latestSalary.baseSalary : employee.salary,
+      allowances: latestSalary ? latestSalary.allowances : 0,
+      deductions: latestSalary ? latestSalary.deductions : 0,
+      overtimeHours: latestSalary ? latestSalary.overtimeHours : 0,
+      lastUpdated: latestSalary ? latestSalary.createdAt : null,
+      hasHistory: !!latestSalary
+    };
+
+    res.json({ success: true, data: currentSalaryData });
+  } catch (err) {
+    console.error('Get current salary error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch current salary data' });
+  }
+};
+
+export const getSalaryById = async (req, res) => {
+  const { id } = req.params;
+  
+  if (!id) {
+    return res.status(400).json({ success: false, message: 'Salary ID is required' });
+  }
+
+  try {
+    // Get specific salary record with employee details
+    const salaryRecord = await prisma.salary.findUnique({
+      where: { id: Number(id) },
+      select: {
+        id: true,
+        baseSalary: true,
+        allowances: true,
+        deductions: true,
+        payDate: true,
+        overtimeHours: true,
+        createdAt: true,
+        updatedAt: true,
+        employee: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            position: true,
+            department: { select: { id: true, name: true } }
+          }
+        }
+      }
+    });
+
+    if (!salaryRecord) {
+      return res.status(404).json({ success: false, message: 'Salary record not found' });
+    }
+
+    const salaryData = {
+      salaryId: salaryRecord.id,
+      employeeId: salaryRecord.employee.id,
+      employeeName: salaryRecord.employee.name,
+      employeeEmail: salaryRecord.employee.email,
+      position: salaryRecord.employee.position,
+      department: salaryRecord.employee.department.name,
+      departmentId: salaryRecord.employee.department.id,
+      baseSalary: salaryRecord.baseSalary,
+      allowances: salaryRecord.allowances,
+      deductions: salaryRecord.deductions,
+      payDate: salaryRecord.payDate,
+      overtimeHours: salaryRecord.overtimeHours,
+      createdAt: salaryRecord.createdAt,
+      updatedAt: salaryRecord.updatedAt
+    };
+
+    res.json({ success: true, data: salaryData });
+  } catch (err) {
+    console.error('Get salary by ID error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch salary record' });
+  }
+};
+
+
+
+
 // NEW: Get overtime data from attendance records
 export const getOvertimeData = async (req, res) => {
   try {
