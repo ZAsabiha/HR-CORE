@@ -40,6 +40,13 @@
   margin: 0;
 }
 
+.overtime-page-header p {
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  color: #6b7280;
+  font-style: italic;
+}
+
 .overtime-container {
   max-width: 100%;
   margin: 0 auto;
@@ -289,9 +296,9 @@
 
 .overtime-table {
   width: 100%;
-  min-width: 1200px;
+  min-width: 1300px; /* Increased to accommodate hourly rate column */
   border-collapse: collapse;
-  table-layout: auto;
+  table-layout: fixed;
 }
 
 .overtime-table-header {
@@ -313,6 +320,39 @@
 
 .overtime-table-th:last-child {
   border-right: none;
+}
+
+/* Specific column widths */
+.overtime-table-th:nth-child(1) { /* Employee */
+  width: 220px;
+}
+
+.overtime-table-th:nth-child(2) { /* Date */
+  width: 100px;
+}
+
+.overtime-table-th:nth-child(3), /* Clock In */
+.overtime-table-th:nth-child(4) { /* Clock Out */
+  width: 80px;
+}
+
+.overtime-table-th:nth-child(5), /* Regular Hours */
+.overtime-table-th:nth-child(6) { /* OT Hours */
+  width: 90px;
+}
+
+.overtime-table-th:nth-child(7) { /* Hourly Rate */
+  width: 100px;
+  min-width: 100px;
+}
+
+.overtime-table-th:nth-child(8), /* Regular Pay */
+.overtime-table-th:nth-child(9) { /* OT Pay */
+  width: 100px;
+}
+
+.overtime-table-th:nth-child(10) { /* Status */
+  width: 90px;
 }
 
 .overtime-table-body {
@@ -417,6 +457,14 @@
   min-width: 100px;
 }
 
+.overtime-table-hourly-rate {
+  font-weight: 600 !important;
+  color: #6b7280 !important;
+  font-family: 'Courier New', monospace !important;
+  min-width: 100px;
+  text-align: center;
+}
+
 .overtime-table-location {
   color: #666;
   min-width: 80px;
@@ -426,32 +474,33 @@
 .overtime-status-badge {
   padding: 6px 12px;
   border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   display: inline-block;
-  min-width: 80px;
+  min-width: 70px;
   text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .overtime-status-high {
-  background-color: #dc2626;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
   color: white;
 }
 
 .overtime-status-medium {
-  background-color: #f59e0b;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
   color: white;
 }
 
 .overtime-status-low {
-  background-color: #10b981;
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
 }
 
 .overtime-status-none {
-  background-color: #6b7280;
+  background: linear-gradient(135deg, #6b7280, #4b5563);
   color: white;
 }
 
@@ -545,6 +594,15 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
+
+  .overtime-table {
+    min-width: 1100px;
+  }
+  
+  .overtime-table-th:nth-child(7) { /* Hourly Rate */
+    width: 90px;
+    min-width: 90px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -601,10 +659,37 @@
     font-size: 12px;
   }
   
+  .overtime-table-th:nth-child(1) { /* Employee */
+    width: 180px;
+  }
+  
+  .overtime-table-th:nth-child(7) { /* Hourly Rate */
+    width: 80px;
+    min-width: 80px;
+  }
+  
+  .overtime-table-hourly-rate {
+    font-size: 12px !important;
+  }
+  
   .overtime-pagination-container {
     flex-direction: column;
     gap: 16px;
     text-align: center;
+  }
+
+  /* Stack page header text on mobile */
+  .overtime-page-header {
+    padding: 16px 20px;
+  }
+  
+  .overtime-page-title {
+    font-size: 20px;
+  }
+  
+  .overtime-page-header p {
+    font-size: 12px;
+    margin-top: 6px;
   }
 }
 
@@ -613,50 +698,19 @@
     padding: 16px;
     margin: 4px;
   }
-  
-  .overtime-stat-card {
-    padding: 16px;
+
+  .overtime-table-th:nth-child(7) { /* Hourly Rate */
+    width: 70px;
+    min-width: 70px;
   }
   
-  .overtime-stat-icon-main {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .overtime-stat-value {
-    font-size: 24px;
-  }
-  
-  .overtime-filters-container {
-    padding: 16px;
-  }
-  
-  .overtime-table {
-    min-width: 900px;
-  }
-  
-  .overtime-table-th,
-  .overtime-table-td {
-    padding: 8px 6px;
-    font-size: 11px;
-  }
-  
-  .overtime-employee-name {
-    font-size: 12px;
-  }
-  
-  .overtime-employee-meta {
-    font-size: 10px;
+  .overtime-table-hourly-rate {
+    font-size: 11px !important;
   }
   
   .overtime-status-badge {
     font-size: 10px;
     padding: 4px 8px;
-    min-width: 70px;
-  }
-
-  .overtime-table-overtime-pay {
-    padding: 2px 4px;
-    min-width: 80px;
+    min-width: 60px;
   }
 }
