@@ -10,6 +10,7 @@ const OvertimePay = () => {
   
   // Backend data states
   const [overtimeData, setOvertimeData] = useState([]);
+  const [salaryData, setSalaryData] = useState([]);
   const [departments, setDepartments] = useState(['all']);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({});
@@ -19,6 +20,53 @@ const OvertimePay = () => {
     totalOvertimeHours: '0.0', 
     totalOvertimePay: '0.00' 
   });
+
+  // OVERTIME CONFIGURATION
+  const OVERTIME_CONFIG = {
+    STANDARD_WORK_HOURS: 8, // Standard work day hours
+    MAX_OVERTIME_HOURS: 4,  // Maximum overtime hours per day
+    OVERTIME_RATE_MULTIPLIER: 1.5, // 1.5x regular hourly rate
+    STANDARD_HOURLY_RATE: 25 // Default hourly rate (should come from employee data)
+  };
+
+  // Calculate overtime with proper logic using real salary data
+  const calculateOvertimeData = (attendanceRecord, salaryData) => {
+    const { totalHours = 0, employeeId } = attendanceRecord;
+    
+    // Find salary data for this employee
+    const employeeSalary = salaryData.find(s => s.employeeId === employeeId);
+    const baseSalary = employeeSalary ? parseFloat(employeeSalary.baseSalary) : 0;
+    
+    // Calculate hourly rate from monthly salary (assuming 160 working hours per month)
+    const hourlyRate = baseSalary / 160;
+    
+    let regularHours = totalHours;
+    let overtimeHours = 0;
+    
+    // If worked more than standard hours, calculate overtime
+    if (totalHours > OVERTIME_CONFIG.STANDARD_WORK_HOURS) {
+      regularHours = OVERTIME_CONFIG.STANDARD_WORK_HOURS;
+      overtimeHours = Math.min(
+        totalHours - OVERTIME_CONFIG.STANDARD_WORK_HOURS,
+        OVERTIME_CONFIG.MAX_OVERTIME_HOURS
+      );
+    }
+    
+    const regularPay = (regularHours * hourlyRate).toFixed(2);
+    const overtimePay = (overtimeHours * hourlyRate * OVERTIME_CONFIG.OVERTIME_RATE_MULTIPLIER).toFixed(2);
+    const totalPay = (parseFloat(regularPay) + parseFloat(overtimePay)).toFixed(2);
+    
+    return {
+      ...attendanceRecord,
+      regularHours: regularHours.toFixed(1),
+      overtimeHours: overtimeHours.toFixed(1),
+      regularPay,
+      overtimePay,
+      totalPay,
+      hourlyRate: hourlyRate.toFixed(2),
+      baseSalary: baseSalary.toFixed(2)
+    };
+  };
 
   // Fetch departments for dropdown
   const fetchDepartments = async () => {
@@ -38,7 +86,24 @@ const OvertimePay = () => {
     }
   };
 
-  // Fetch overtime data from backend
+  // Fetch current salary data for all employees
+  const fetchSalaryData = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/salaries/current/all', {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setSalaryData(result.data);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching salary data:', error);
+    }
+  };
+
+  // Fetch attendance logs with overtime calculations
   const fetchOvertimeData = async () => {
     setLoading(true);
     try {
@@ -74,21 +139,33 @@ const OvertimePay = () => {
         params.append('endDate', today.toISOString().split('T')[0]);
       }
 
-      const response = await fetch(`http://localhost:5000/api/salaries/overtime/data?${params}`, {
+      // Fetch attendance logs instead of separate overtime endpoint
+      const response = await fetch(`http://localhost:5000/api/attendance/logs?${params}`, {
         credentials: 'include'
       });
       
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
-          setOvertimeData(result.data);
+          // Filter only records with overtime (totalHours > 8)
+          const attendanceWithOT = (result.logs || []).filter(record => record.totalHours > OVERTIME_CONFIG.STANDARD_WORK_HOURS);
+          
+          // Process data with proper overtime calculations using real salary data
+          const processedData = attendanceWithOT.map(record => calculateOvertimeData(record, salaryData));
+          setOvertimeData(processedData);
+          
+          // Calculate stats from processed data
+          const totalOvertimeHours = processedData.reduce((sum, record) => sum + parseFloat(record.overtimeHours), 0);
+          const totalOvertimePay = processedData.reduce((sum, record) => sum + parseFloat(record.overtimePay), 0);
+          const employeesWithOT = processedData.filter(record => parseFloat(record.overtimeHours) > 0).length;
+          
           setStats({
-            totalEmployees: result.stats.totalEmployees,
-            eligibleForOvertime: result.stats.totalEmployees, // All records have overtime
-            totalOvertimeHours: result.stats.totalOvertimeHours.toString(),
-            totalOvertimePay: result.stats.totalOvertimePay.toString()
+            totalEmployees: processedData.length,
+            eligibleForOvertime: employeesWithOT,
+            totalOvertimeHours: totalOvertimeHours.toFixed(1),
+            totalOvertimePay: totalOvertimePay.toFixed(2)
           });
-          setPagination(result.pagination);
+          setPagination(result.pagination || {});
         }
       }
     } catch (error) {
@@ -101,11 +178,15 @@ const OvertimePay = () => {
   // Load data on component mount and filter changes
   useEffect(() => {
     fetchDepartments();
+    fetchSalaryData();
   }, []);
 
   useEffect(() => {
-    fetchOvertimeData();
-  }, [selectedDepartment, dateRange]);
+    // Only fetch overtime data if salary data is available
+    if (salaryData.length > 0) {
+      fetchOvertimeData();
+    }
+  }, [selectedDepartment, dateRange, salaryData]);
 
   // Filter data based on search term
   const filteredData = useMemo(() => {
@@ -118,22 +199,25 @@ const OvertimePay = () => {
     });
   }, [overtimeData, searchTerm]);
 
-  // Apply status filter
+  // Apply status filter with your new thresholds
   const statusFilteredData = useMemo(() => {
     if (selectedStatus === 'all') return filteredData;
     
     return filteredData.filter(record => {
-      if (selectedStatus === 'high' && record.overtimeHours > 4) return true;
-      if (selectedStatus === 'medium' && record.overtimeHours > 2 && record.overtimeHours <= 4) return true;
-      if (selectedStatus === 'low' && record.overtimeHours > 0 && record.overtimeHours <= 2) return true;
+      const overtimeHours = parseFloat(record.overtimeHours);
+      if (selectedStatus === 'high' && overtimeHours > 2 && overtimeHours <= 4) return true;
+      if (selectedStatus === 'medium' && overtimeHours > 1 && overtimeHours <= 2) return true;
+      if (selectedStatus === 'low' && overtimeHours > 0 && overtimeHours <= 1) return true;
       return false;
     });
   }, [filteredData, selectedStatus]);
 
+  // Updated overtime status logic based on your requirements
   const getOvertimeStatus = (overtimeHours) => {
-    if (overtimeHours > 4) return 'high';
-    if (overtimeHours > 2) return 'medium';
-    if (overtimeHours > 0) return 'low';
+    const hours = parseFloat(overtimeHours);
+    if (hours > 2 && hours <= 4) return 'high';     // 2-4 hours = High
+    if (hours > 1 && hours <= 2) return 'medium';   // 1-2 hours = Medium  
+    if (hours > 0 && hours <= 1) return 'low';      // 0-1 hours = Low
     return 'none';
   };
 
@@ -148,7 +232,7 @@ const OvertimePay = () => {
 
     const statusLabels = {
       high: 'High OT',
-      medium: 'Medium OT',
+      medium: 'Medium OT', 
       low: 'Low OT',
       none: 'No OT'
     };
@@ -175,19 +259,8 @@ const OvertimePay = () => {
 
   const handleExport = async () => {
     try {
-      const params = new URLSearchParams();
-      if (selectedDepartment !== 'all') params.append('department', selectedDepartment);
-      
-      // Add date range
-      const today = new Date();
-      if (dateRange === 'this_month') {
-        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-        params.append('startDate', monthStart.toISOString().split('T')[0]);
-        params.append('endDate', today.toISOString().split('T')[0]);
-      }
-
       // Create CSV content
-      const headers = ['Date', 'Employee', 'Department', 'Clock In', 'Clock Out', 'Regular Hours', 'Overtime Hours', 'Regular Pay ($)', 'Overtime Pay ($)', 'Total Pay ($)', 'Status'];
+      const headers = ['Date', 'Employee', 'Department', 'Clock In', 'Clock Out', 'Regular Hours', 'Overtime Hours', 'Hourly Rate ($)', 'Regular Pay ($)', 'Overtime Pay ($)', 'Total Pay ($)', 'Status'];
       const csvContent = [
         headers.join(','),
         ...statusFilteredData.map(record => [
@@ -198,6 +271,7 @@ const OvertimePay = () => {
           formatTime(record.checkOutTime),
           record.regularHours,
           record.overtimeHours,
+          record.hourlyRate,
           record.regularPay,
           record.overtimePay,
           record.totalPay,
@@ -220,10 +294,18 @@ const OvertimePay = () => {
   };
 
   return (
-    <div className="overtime-main-content">
+    <div
+      className="overtime-main-content"
+      style={{
+        marginLeft: "3.5cm",
+      }}
+    >
       {/* Page Title */}
       <div className="overtime-page-header">
-        <h1 className="overtime-page-title">Overtime Pay</h1>
+        <h1 className="overtime-page-title">Overtime Pay Management</h1>
+        <p style={{ color: '#6b7280', marginTop: '8px', fontSize: '14px' }}>
+          Standard: 8hr work day | Max OT: 4hr/day | Rate: 1.5x regular pay
+        </p>
       </div>
 
       <div className="overtime-container">
@@ -234,7 +316,7 @@ const OvertimePay = () => {
               <div className="overtime-stat-info">
                 <Users className="overtime-stat-icon-main" />
                 <div className="overtime-stat-details">
-                  <p className="overtime-stat-title">Employees with OT</p>
+                  <p className="overtime-stat-title">Total Records</p>
                   <p className="overtime-stat-value">{stats.totalEmployees}</p>
                 </div>
               </div>
@@ -246,8 +328,8 @@ const OvertimePay = () => {
               <div className="overtime-stat-info">
                 <Clock className="overtime-stat-icon-main" />
                 <div className="overtime-stat-details">
-                  <p className="overtime-stat-title">Total Records</p>
-                  <p className="overtime-stat-value">{statusFilteredData.length}</p>
+                  <p className="overtime-stat-title">Employees with OT</p>
+                  <p className="overtime-stat-value">{stats.eligibleForOvertime}</p>
                 </div>
               </div>
             </div>
@@ -327,9 +409,9 @@ const OvertimePay = () => {
                 onChange={(e) => setSelectedStatus(e.target.value)}
               >
                 <option value="all">All Status</option>
-                <option value="high">High OT (>4h)</option>
-                <option value="medium">Medium OT (2-4h)</option>
-                <option value="low">Low OT (0-2h)</option>
+                <option value="high">High OT (2-4h)</option>
+                <option value="medium">Medium OT (1-2h)</option>
+                <option value="low">Low OT (0-1h)</option>
               </select>
             </div>
 
@@ -362,10 +444,10 @@ const OvertimePay = () => {
                     <th className="overtime-table-th">Clock Out</th>
                     <th className="overtime-table-th">Regular Hours</th>
                     <th className="overtime-table-th">OT Hours</th>
+                    <th className="overtime-table-th">Hourly Rate</th>
                     <th className="overtime-table-th">Regular Pay</th>
                     <th className="overtime-table-th">OT Pay</th>
                     <th className="overtime-table-th">Status</th>
-                    <th className="overtime-table-th">Location</th>
                   </tr>
                 </thead>
                 <tbody className="overtime-table-body">
@@ -380,7 +462,9 @@ const OvertimePay = () => {
                           </div>
                           <div className="overtime-employee-details">
                             <div className="overtime-employee-name">{record.employeeName}</div>
-                            <div className="overtime-employee-meta">{record.position} • {record.department}</div>
+                            <div className="overtime-employee-meta">
+                              {record.position} • {record.department} • Base: ${record.baseSalary}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -389,10 +473,10 @@ const OvertimePay = () => {
                       <td className="overtime-table-td overtime-table-time">{formatTime(record.checkOutTime)}</td>
                       <td className="overtime-table-td overtime-table-hours">{record.regularHours}h</td>
                       <td className="overtime-table-td overtime-table-overtime">{record.overtimeHours}h</td>
+                      <td className="overtime-table-td overtime-table-pay">${record.hourlyRate}/hr</td>
                       <td className="overtime-table-td overtime-table-pay">${record.regularPay}</td>
                       <td className="overtime-table-td overtime-table-overtime-pay">${record.overtimePay}</td>
                       <td className="overtime-table-td">{getStatusBadge(record.overtimeHours)}</td>
-                      <td className="overtime-table-td overtime-table-location">{record.location || 'Office'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -435,3 +519,5 @@ const OvertimePay = () => {
 };
 
 export default OvertimePay;
+
+  //
