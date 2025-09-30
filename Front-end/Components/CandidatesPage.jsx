@@ -1,134 +1,129 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import './RecruitmentDashboard.css'; 
+import ViewCandidateModal from './modals/ViewCandidateModal';
+import ContactCandidateModal from './modals/ContactCandidateModal';
+import ScheduleInterviewModal from './modals/ScheduleInterviewModal';
 
-// Import Modal Components
-import ViewCandidateModal from './Components/modals/ViewCandidateModal.jsx';
-import EditCandidateModal from './Components/modals/EditCandidateModal.jsx';
-import ContactCandidateModal from './Components/modals/ContactCandidateModal.jsx';
-import ScheduleInterviewModal from './Components/modals/ScheduleInterviewModal.jsx';
-import AddCandidateModal from './Components/modals/AddCandidateModal.jsx';
+const API_BASE_URL = 'http://localhost:5000';
 
 const CandidatesPage = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [jobFilter, setJobFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('name');
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [candidates, setCandidates] = useState([]);
+  
   // Modal states
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
-  const [addCandidateModalOpen, setAddCandidateModalOpen] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [candidateInterviews, setCandidateInterviews] = useState([]);
 
-  // Store interviews separately
-  const [interviews, setInterviews] = useState([]);
-
-  const stats = [
-    { id: 1, title: 'Total Candidates', value: '247', change: '+12%', icon: '👥', color: 'blue' },
-    { id: 2, title: 'New Applications', value: '45', change: '+8', icon: '📝', color: 'green' },
-    { id: 3, title: 'Interviews Scheduled', value: '12', change: '+3', icon: '📅', color: 'purple' },
-    { id: 4, title: 'Offers Extended', value: '5', change: '+2', icon: '✅', color: 'orange' }
-  ];
-
-  const [candidates, setCandidates] = useState([
-    {
-      id: 1,
-      name: 'Raisa Raihan',
-      email: 'prithwi@email.com',
-      phone: '+8801824031787',
-      position: 'Senior Software Engineer',
-      experience: '5+ years',
-      status: 'New',
-      appliedDate: '15/07/2024',
-      source: 'LinkedIn',
-      rating: 4.5,
-      skills: ['React', 'Node.js', 'Python', 'AWS', 'MongoDB']
-    },
-    {
-      id: 2,
-      name: 'Shuvo Hossain',
-      email: 'm.rodriguez@email.com',
-      phone: '+880 1823-456789',
-      position: 'Product Manager',
-      experience: '3+ years',
-      status: 'Screening',
-      appliedDate: '14/07/2024',
-      source: 'Indeed',
-      rating: 4.2,
-      skills: ['Product Strategy', 'Analytics', 'Leadership', 'Agile']
-    },
-    {
-      id: 3,
-      name: 'Ziaul Amin',
-      email: 'e.liu@email.com',
-      phone: '+880 1823-456789',
-      position: 'UX Designer',
-      experience: '4+ years',
-      status: 'Interview',
-      appliedDate: '13/07/2024',
-      source: 'Website',
-      rating: 4.8,
-      skills: ['Figma', 'User Research', 'Prototyping', 'Adobe Creative Suite']
-    },
-    {
-      id: 4,
-      name: 'Mohammad Karim',
-      email: 'd.karim@email.com',
-      phone: '+880 1823-456789',
-      position: 'Data Scientist',
-      experience: '6+ years',
-      status: 'Offer',
-      appliedDate: '12/07/2024',
-      source: 'Referral',
-      rating: 4.6,
-      skills: ['Python', 'Machine Learning', 'SQL', 'TensorFlow', 'R']
-    },
-    {
-      id: 5,
-      name: 'Fatima Begum',
-      email: 'fatima.begum@email.com',
-      phone: '+880 1934-567890',
-      position: 'DevOps Engineer',
-      experience: '4+ years',
-      status: 'New',
-      appliedDate: '11/07/2024',
-      source: 'LinkedIn',
-      rating: 4.3,
-      skills: ['AWS', 'Docker', 'Kubernetes', 'Jenkins', 'Terraform']
-    },
-    {
-      id: 6,
-      name: 'Shohel Ahmed',
-      email: 'shohel.ahmed@email.com',
-      phone: '+880 1645-678901',
-      position: 'Frontend Developer',
-      experience: '3+ years',
-      status: 'Screening',
-      appliedDate: '10/07/2024',
-      source: 'Indeed',
-      rating: 4.1,
-      skills: ['Vue.js', 'CSS', 'JavaScript', 'TypeScript', 'Sass']
+  const fetchCandidates = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(`${API_BASE_URL}/api/candidates`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch candidates');
+      }
+      
+      const data = await response.json();
+      setCandidates(data);
+      
+    } catch (err) {
+      setError('Failed to load candidates');
+    } finally {
+      setLoading(false);
     }
-  ]);
-
-  const [jobPostings] = useState([
-    { id: 1, title: 'Senior Software Engineer', department: 'Engineering', applicants: 45, status: 'Active', location: 'Remote', postedDate: '01/07/2024' },
-    { id: 2, title: 'Product Manager', department: 'Product', applicants: 32, status: 'Active', location: 'New York', postedDate: '28/06/2024' },
-    { id: 3, title: 'UX Designer', department: 'Design', applicants: 28, status: 'Draft', location: 'San Francisco', postedDate: '25/06/2024' },
-    { id: 4, title: 'Data Scientist', department: 'Analytics', applicants: 19, status: 'Active', location: 'Remote', postedDate: '22/06/2024' },
-    { id: 5, title: 'DevOps Engineer', department: 'Engineering', applicants: 15, status: 'Active', location: 'Austin', postedDate: '20/06/2024' }
-  ]);
-
-  // Modal action handlers
-  const handleViewCandidate = (candidate) => {
-    setSelectedCandidate(candidate);
-    setViewModalOpen(true);
   };
 
-  const handleEditCandidate = (candidate) => {
+  const fetchCandidateInterviews = async (candidateId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/candidates/${candidateId}/interviews`);
+      if (response.ok) {
+        const interviews = await response.json();
+        setCandidateInterviews(interviews);
+      } else {
+        setCandidateInterviews([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch interviews:', err);
+      setCandidateInterviews([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchCandidates();
+  }, []);
+
+  const handleStatusChange = async (candidateId, newStatus) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/candidates/${candidateId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update status');
+      }
+
+      setCandidates(prev => 
+        prev.map(candidate => 
+          candidate.id === candidateId 
+            ? { ...candidate, status: newStatus }
+            : candidate
+        )
+      );
+      
+    } catch (err) {
+      alert('Failed to update candidate status');
+    }
+  };
+
+
+
+  const handleDownloadCV = async (candidateId, candidateName) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/candidates/${candidateId}/cv/download`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          alert('CV not found for this candidate');
+        } else {
+          throw new Error('Failed to download CV');
+        }
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `${candidateName}_CV.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+    } catch (err) {
+      console.error('Download error:', err);
+      alert('Failed to download CV. Please try again.');
+    }
+  };
+
+  const handleViewCandidate = async (candidate) => {
     setSelectedCandidate(candidate);
-    setEditModalOpen(true);
+    await fetchCandidateInterviews(candidate.id);
+    setViewModalOpen(true);
   };
 
   const handleContactCandidate = (candidate) => {
@@ -141,81 +136,67 @@ const CandidatesPage = () => {
     setScheduleModalOpen(true);
   };
 
-  // Save candidate changes
-  const handleSaveCandidate = (updatedCandidate) => {
-    setCandidates(prev => 
-      prev.map(candidate => 
-        candidate.id === updatedCandidate.id ? updatedCandidate : candidate
-      )
-    );
-  };
-
-  // Add new candidate
-  const handleAddCandidate = (newCandidate) => {
-    setCandidates(prev => [newCandidate, ...prev]);
-    alert('Candidate added successfully!');
-  };
-
-  // Handle status changes from contact modal
-  const handleStatusChange = (candidateId, newStatus) => {
-    setCandidates(prev => 
-      prev.map(candidate => 
-        candidate.id === candidateId 
-          ? { ...candidate, status: newStatus }
-          : candidate
-      )
-    );
-  };
-
-  // Enhanced interview scheduling with automatic status changes
-  const handleScheduleInterviewSave = (interviewData) => {
-    // Store the interview
-    const newInterview = {
-      ...interviewData,
-      id: Date.now(),
-      createdAt: new Date().toISOString()
-    };
-    
-    setInterviews(prev => [...prev, newInterview]);
-    
-    // Determine new status based on interview type and current status
-    let newStatus = selectedCandidate.status;
-    
-    if (selectedCandidate.status === 'New') {
-      // Phone/Video from New = Screening (initial screening calls)
-      if (interviewData.type === 'phone' || interviewData.type === 'video') {
-        newStatus = 'Screening';
+  const handleScheduleInterviewSubmit = async (interviewData) => {
+    try {
+      if (!interviewData.date || !interviewData.time || !interviewData.interviewer) {
+        alert('Please fill in Date, Time, and Interviewer fields');
+        return;
       }
-    } else if (selectedCandidate.status === 'Screening') {
-      // Any interview from Screening = Interview (formal interview process)
-      newStatus = 'Interview';
-    }
-    // Interview status candidates stay as Interview for additional rounds
-    
-    // Update candidate status if changed
-    if (newStatus !== selectedCandidate.status) {
-      const updatedCandidate = { ...selectedCandidate, status: newStatus };
-      handleSaveCandidate(updatedCandidate);
-      
-      // Show status change notification
-      const statusMessage = `Interview scheduled! Candidate status updated: ${selectedCandidate.status} → ${newStatus}`;
-      alert(statusMessage);
-    } else {
-      alert('Interview scheduled successfully!');
-    }
-    
-    console.log('Interview scheduled:', newInterview);
-  };
 
-  // Get interviews for a specific candidate
-  const getCandidateInterviews = (candidateId) => {
-    return interviews.filter(interview => interview.candidateId === candidateId);
+      const requestData = {
+        candidateId: selectedCandidate.id,
+        candidateName: selectedCandidate.name,
+        position: selectedCandidate.position,
+        date: interviewData.date,
+        time: interviewData.time,
+        duration: String(interviewData.duration || '60'),
+        type: interviewData.type.toUpperCase().replace('-', '_'), // Convert 'in-person' to 'IN_PERSON'
+        interviewer: interviewData.interviewer,
+        location: interviewData.location || '',
+        notes: interviewData.notes || ''
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/interviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to schedule interview');
+      }
+
+      // Update candidate status based on interview type and current status
+    
+let newStatus = selectedCandidate.status;
+const interviewTypeUpper = interviewData.type.toUpperCase().replace('-', '_');
+
+if (selectedCandidate.status === 'New' && (interviewTypeUpper === 'PHONE' || interviewTypeUpper === 'VIDEO')) {
+  newStatus = 'Screening';
+} else if (selectedCandidate.status === 'Screening') {
+  newStatus = 'Interview';
+}
+
+      if (newStatus !== selectedCandidate.status) {
+        await handleStatusChange(selectedCandidate.id, newStatus);
+      }
+
+      alert('Interview scheduled successfully!');
+      setScheduleModalOpen(false);
+      fetchCandidates();
+      
+    } catch (err) {
+      alert(`Failed to schedule interview: ${err.message}`);
+    }
   };
 
   const getStatusClass = (status) => {
     const statusClasses = {
       'New': 'status-new',
-      'Screening': 'status-screening',
+      'Screening': 'status-screening', 
       'Interview': 'status-interview',
       'Offer': 'status-offer',
       'Rejected': 'status-rejected'
@@ -224,23 +205,55 @@ const CandidatesPage = () => {
   };
 
   const filteredCandidates = candidates.filter(candidate => {
-    const matchesSearch = candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           candidate.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           candidate.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || candidate.status.toLowerCase() === statusFilter;
+    const matchesSearch = candidate.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           candidate.position?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           candidate.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || candidate.status?.toLowerCase() === statusFilter;
     const matchesJob = jobFilter === 'all' || candidate.position === jobFilter;
     
     return matchesSearch && matchesStatus && matchesJob;
   });
 
-  const sortedAndFilteredCandidates = filteredCandidates.sort((a, b) => {
-    switch(sortBy) {
-      case 'name': return a.name.localeCompare(b.name);
-      case 'date': return new Date(b.appliedDate) - new Date(a.appliedDate);
-      case 'rating': return b.rating - a.rating;
-      default: return 0;
-    }
-  });
+
+
+  if (loading) {
+    return (
+      <div className="main-content">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '400px',
+          flexDirection: 'column',
+          gap: '16px'
+        }}>
+          <div style={{ fontSize: '48px' }}>⏳</div>
+          <p>Loading candidates...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="main-content">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '400px',
+          flexDirection: 'column',
+          gap: '16px'
+        }}>
+          <div style={{ fontSize: '48px' }}>⚠</div>
+          <p>{error}</p>
+          <button onClick={fetchCandidates} className="btn-primary">
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="main-content">
@@ -252,25 +265,56 @@ const CandidatesPage = () => {
 
       {/* Stats Grid */}
       <div className="stats-grid">
-        {stats.map((stat) => (
-          <div key={stat.id} className={`stat-card stat-${stat.color}`}>
-            <div className="stat-content">
-              <div className="stat-info">
-                <h3 className="stat-title">{stat.title}</h3>
-                <div className="stat-value">{stat.value}</div>
-                <div className="stat-change">{stat.change}</div>
-              </div>
-              <div className="stat-icon">
-                {stat.icon}
+        <div className="stat-card">
+          <div className="stat-content">
+            <div>
+              <h3 className="stat-title">Total Candidates</h3>
+              <div className="stat-value">{candidates.length}</div>
+            </div>
+            <div className="stat-icon">👥</div>
+          </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-content">
+            <div>
+              <h3 className="stat-title">New Applications</h3>
+              <div className="stat-value">
+                {candidates.filter(c => c.status?.toLowerCase() === 'new').length}
               </div>
             </div>
+            <div className="stat-icon">📄</div>
           </div>
-        ))}
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-content">
+            <div>
+              <h3 className="stat-title">CVs Received</h3>
+              <div className="stat-value">
+                {candidates.filter(c => c.hasCV).length}
+              </div>
+            </div>
+            <div className="stat-icon">📎</div>
+          </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-content">
+            <div>
+              <h3 className="stat-title">In Interview</h3>
+              <div className="stat-value">
+                {candidates.filter(c => c.status?.toLowerCase() === 'interview').length}
+              </div>
+            </div>
+            <div className="stat-icon">📅</div>
+          </div>
+        </div>
       </div>
 
       {/* Search and Actions */}
       <div className="actions-row">
-        <h2 className="section-title">Candidate Applications</h2>
+        <h2 className="section-title">Candidates</h2>
         <div className="search-actions">
           <select
             value={jobFilter}
@@ -278,209 +322,210 @@ const CandidatesPage = () => {
             className="filter-select"
           >
             <option value="all">All Positions</option>
-            {[...new Set(candidates.map(c => c.position))].map(position => (
+            {[...new Set(candidates.map(c => c.position).filter(Boolean))].map(position => (
               <option key={position} value={position}>{position}</option>
             ))}
           </select>
+          
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option value="all">All Status</option>
+            <option value="new">New</option>
+            <option value="screening">Screening</option>
+            <option value="interview">Interview</option>
+            <option value="offer">Offer</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          
           <div className="search-box">
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search candidates..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
             />
-            <button className="search-icon">🔍</button>
           </div>
-          <button className="filter-button">⚙️</button>
-          <button
-            onClick={() => setAddCandidateModalOpen(true)}
-            style={{
-              padding: '12px 24px',
-              background: 'linear-gradient(135deg, #0C3D4A, #1a4f5e)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '10px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 15px rgba(12, 61, 74, 0.3)',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <span style={{
-              background: 'rgba(255, 255, 255, 0.2)',
-              borderRadius: '50%',
-              width: '24px',
-              height: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '16px'
-            }}>
-              ➕
-            </span>
-            Add New Candidate
+          
+          <button onClick={fetchCandidates} className="btn-secondary">
+            🔄 Refresh
           </button>
-        </div>
-      </div>
-
-      {/* Status Filter Tabs */}
-      <div className="status-filter-container">
-        <div className="status-filter-tabs">
-          {['all', 'new', 'screening', 'interview', 'offer'].map((status) => (
-            <button
-              key={status}
-              onClick={() => setStatusFilter(status)}
-              className={`status-tab ${statusFilter === status ? 'active' : ''}`}
-            >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-              <span className="status-count">
-                {status === 'all' 
-                  ? filteredCandidates.length 
-                  : candidates.filter(c => c.status.toLowerCase() === status && 
-                      (jobFilter === 'all' || c.position === jobFilter) &&
-                      (c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                       c.position.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                       c.email.toLowerCase().includes(searchTerm.toLowerCase()))).length
-                }
-              </span>
-            </button>
-          ))}
-        </div>
-        <div className="sort-container">
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="sort-select"
-          >
-            <option value="name">Sort by Name</option>
-            <option value="date">Sort by Date</option>
-            <option value="rating">Sort by Rating</option>
-          </select>
         </div>
       </div>
 
       {/* Candidates Grid */}
       <div className="candidates-grid">
-        {sortedAndFilteredCandidates.map((candidate) => (
-          <div key={candidate.id} className="candidate-card">
-            <div className="candidate-header">
-              <div className="candidate-avatar">
-                {candidate.name.split(' ').map(n => n[0]).join('')}
-              </div>
-              <div className="candidate-basic-info">
-                <h3 className="candidate-name">{candidate.name}</h3>
-                <p className="candidate-position">{candidate.position}</p>
-                <div className="candidate-rating">
-                  <span>⭐</span>
-                  <span>{candidate.rating}</span>
+        {filteredCandidates.length === 0 ? (
+          <div style={{ 
+            gridColumn: '1 / -1', 
+            textAlign: 'center', 
+            padding: '60px 20px',
+            color: '#6b7280' 
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>👤</div>
+            <h3>No candidates found</h3>
+            <p>Try adjusting your search criteria or check back later for new applications.</p>
+          </div>
+        ) : (
+          filteredCandidates.map((candidate) => (
+            <div key={candidate.id} className="candidate-card">
+              <div className="candidate-header">
+                <div className="candidate-avatar">
+                  {(candidate.name || 'U').split(' ').map(n => n[0]).join('')}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 className="candidate-name">{candidate.name || 'Unknown'}</h3>
+                  <p className="candidate-position">{candidate.position || 'N/A'}</p>
+                </div>
+                <div className="candidate-status">
+                  <span className={`status-badge ${getStatusClass(candidate.status)}`}>
+                    {candidate.status || 'New'}
+                  </span>
                 </div>
               </div>
-              <div className="candidate-status">
-                <span className={`status-badge ${getStatusClass(candidate.status)}`}>
-                  {candidate.status}
-                </span>
+              
+              <div className="candidate-details">
+                <div className="detail-row">
+                  <span className="detail-label">📧 Email:</span>
+                  <span className="detail-value">{candidate.email || 'N/A'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">📱 Phone:</span>
+                  <span className="detail-value">{candidate.phone || 'N/A'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">📅 Applied:</span>
+                  <span className="detail-value">{candidate.appliedDate || 'N/A'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">🔗 Source:</span>
+                  <span className="detail-value">{candidate.source || 'Website'}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">💼 Experience:</span>
+                  <span className="detail-value">{candidate.experience || 'N/A'}</span>
+                </div>
               </div>
-            </div>
-            
-            <div className="candidate-details">
-              <div className="detail-row">
-                <span className="detail-label">📧 Email:</span>
-                <span className="detail-value">{candidate.email}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">📱 Phone:</span>
-                <span className="detail-value">{candidate.phone}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">📅 Applied:</span>
-                <span className="detail-value">{candidate.appliedDate}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">🔗 Source:</span>
-                <span className="detail-value">{candidate.source}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">💼 Experience:</span>
-                <span className="detail-value">{candidate.experience}</span>
-              </div>
-            </div>
 
-            <div className="candidate-skills">
-              {candidate.skills.map((skill, index) => (
-                <span key={index} className="skill-tag">{skill}</span>
-              ))}
-            </div>
+              <div className="candidate-skills">
+                {(candidate.skills || []).map((skill, index) => (
+                  <span key={index} className="skill-tag">{skill}</span>
+                ))}
+              </div>
 
-            <div className="candidate-actions">
-              <button 
-                className="action-btn btn-view"
-                onClick={() => handleViewCandidate(candidate)}
-              >
-                👁️ View
-              </button>
-              <button 
-                className="action-btn btn-edit"
-                onClick={() => handleEditCandidate(candidate)}
-              >
-                ✏️ Edit
-              </button>
-              <button 
-                className="action-btn btn-contact"
-                onClick={() => handleContactCandidate(candidate)}
-              >
-                💬 Contact
-              </button>
-              <button 
-                className="action-btn btn-schedule"
-                onClick={() => handleScheduleInterview(candidate)}
-              >
-                📅 Schedule
-              </button>
+              {/* CV Section */}
+              <div className={`cv-section ${candidate.hasCV ? 'cv-available' : 'cv-missing'}`}>
+                <div className="cv-info">
+                  <span className="cv-label">📎 CV/Resume:</span>
+                  <span className={`cv-status ${candidate.hasCV ? 'available' : 'missing'}`}>
+                    {candidate.hasCV ? '✅ Available' : '⚠ Not Uploaded'}
+                  </span>
+                </div>
+                
+                {candidate.hasCV && candidate.cvOriginalName && (
+                  <div className="cv-filename">
+                    📄 {candidate.cvOriginalName}
+                  </div>
+                )}
+                
+                <div className="cv-actions">
+                  {candidate.hasCV ? (
+                    <button
+                      onClick={() => handleDownloadCV(candidate.id, candidate.name)}
+                      className="cv-download-btn"
+                    >
+                      📥 Download CV
+                    </button>
+                  ) : (
+                    <button
+                      className="cv-download-btn"
+                      disabled
+                    >
+                      📎 No CV Available
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="status-selector">
+                <select
+                  value={candidate.status || 'New'}
+                  onChange={(e) => handleStatusChange(candidate.id, e.target.value)}
+                  className="status-select"
+                >
+                  <option value="New">New</option>
+                  <option value="Screening">Screening</option>
+                  <option value="Interview">Interview</option>
+                  <option value="Offer">Offer</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+
+              <div className="candidate-actions">
+                <button 
+                  className="action-btn view"
+                  onClick={() => handleViewCandidate(candidate)}
+                >
+                  👁️ View Details
+                </button>
+                <button 
+                  className="action-btn contact"
+                  onClick={() => handleContactCandidate(candidate)}
+                >
+                  💬 Contact
+                </button>
+                <button 
+                  className="action-btn schedule"
+                  onClick={() => handleScheduleInterview(candidate)}
+                >
+                  📅 Schedule
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
-      {/* Modal Components */}
-      <ViewCandidateModal
-        candidate={selectedCandidate}
-        candidateInterviews={selectedCandidate ? getCandidateInterviews(selectedCandidate.id) : []}
-        isOpen={viewModalOpen}
-        onClose={() => setViewModalOpen(false)}
-      />
-      
-      <EditCandidateModal
-        candidate={selectedCandidate}
-        isOpen={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        onSave={handleSaveCandidate}
-      />
-      
-      <ContactCandidateModal
-        candidate={selectedCandidate}
-        isOpen={contactModalOpen}
-        onClose={() => setContactModalOpen(false)}
-        onStatusChange={handleStatusChange}
-      />
-      
-      <ScheduleInterviewModal
-        candidate={selectedCandidate}
-        isOpen={scheduleModalOpen}
-        onClose={() => setScheduleModalOpen(false)}
-        onSchedule={handleScheduleInterviewSave}
-      />
+      {/* Modals */}
+      {viewModalOpen && selectedCandidate && (
+        <ViewCandidateModal
+          candidate={selectedCandidate}
+          candidateInterviews={candidateInterviews}
+          isOpen={viewModalOpen}
+          onClose={() => {
+            setViewModalOpen(false);
+            setSelectedCandidate(null);
+            setCandidateInterviews([]);
+          }}
+        />
+      )}
 
-      <AddCandidateModal
-        isOpen={addCandidateModalOpen}
-        onClose={() => setAddCandidateModalOpen(false)}
-        onAdd={handleAddCandidate}
-        jobPostings={jobPostings}
-      />
+      {contactModalOpen && selectedCandidate && (
+        <ContactCandidateModal
+          candidate={selectedCandidate}
+          isOpen={contactModalOpen}
+          onClose={() => {
+            setContactModalOpen(false);
+            setSelectedCandidate(null);
+          }}
+          onStatusChange={handleStatusChange}
+        />
+      )}
+
+      {scheduleModalOpen && selectedCandidate && (
+        <ScheduleInterviewModal
+          candidate={selectedCandidate}
+          isOpen={scheduleModalOpen}
+          onClose={() => {
+            setScheduleModalOpen(false);
+            setSelectedCandidate(null);
+          }}
+          onSchedule={handleScheduleInterviewSubmit}
+        />
+      )}
     </div>
   );
 };
