@@ -1,0 +1,490 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        Int         @id @default(autoincrement())
+  name      String
+  email     String      @unique
+  password  String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  reportings Reporting[]
+}
+
+
+model Attendance {
+  id           Int      @id @default(autoincrement())
+  employeeId   Int
+  checkInTime  DateTime?
+  checkOutTime DateTime?
+  breakStart   DateTime?
+  breakEnd     DateTime?
+  
+  totalHours   Float?    // Calculated total working hours
+  breakMinutes Int?      // Break duration in minutes
+  overtime     Float?    // Overtime hours if any
+  
+date      DateTime @default(now())  // <-- Add default value
+  status       AttendanceStatus @default(ABSENT)
+  notes        String?
+  location     String?   // Office, Remote, etc.
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, date]) // One attendance record per employee per day
+  @@index([employeeId])
+  @@index([date])
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+  ON_BREAK
+  EARLY_DEPARTURE
+  OVERTIME
+}
+
+model Department {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  employees Employee[]
+}
+
+
+model Employee {
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  password      String?       
+  salary        Float
+  departmentId  Int
+  position      String
+  status        String
+  joinDate      DateTime
+  
+  dateOfBirth   DateTime?      
+  experience    Int
+  role          Role           @default(EMPLOYEE)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  attendances   Attendance[]
+  department    Department     @relation(fields: [departmentId], references: [id])
+  goals         Goal[]
+  leaveRequests LeaveRequest[]
+  recruitments  Recruitment[]
+  salaries      Salary[]
+  performanceReviews PerformanceReview[]
+  notifications Notification[] 
+
+  @@index([departmentId])
+}
+
+model Goal {
+  id          Int            @id @default(autoincrement())
+  employeeId  Int
+  name        String
+  goalTitle   String
+  description String
+  deadline    DateTime
+  status      String         @default("Not Started")
+  progress    Int            @default(0)
+  priority    String         @default("Medium")
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  employee    Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  notifications Notification[]  
+}
+
+
+model HRSystem {
+  id          Int      @id @default(autoincrement())
+  status      String
+  lastUpdated DateTime
+  version     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LeaveRequest {
+  id             Int       @id @default(autoincrement())
+  employeeId     Int
+  leaveType      String
+  startDate      DateTime
+  endDate        DateTime
+  resumptionDate DateTime?
+  reason         String    @db.Text
+  status         String    @default("Pending")
+  documentPath   String?
+  approvedBy     String?
+  approvedDate   DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("leave_requests")
+}
+
+model Recruitment {
+  id          Int      @id @default(autoincrement())
+  type        String
+  employeeId  Int
+  date        DateTime
+  status      String 
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+}
+
+
+
+
+model Reporting {
+  id          Int          @id @default(autoincrement())
+  adminId     Int
+  reportType  ReportType
+  title       String
+  description String?
+  parameters  Json?        
+  filePath    String?      
+  fileSize    Int?        
+  status      ReportStatus @default(PENDING)
+  generatedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  admin       Admin        @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  notifications Notification[] 
+
+  @@index([adminId])
+  @@index([reportType])
+  @@index([createdAt])
+}
+
+enum ReportType {
+  ATTENDANCE_SUMMARY
+  LEAVE_SUMMARY  
+  PAYROLL_SUMMARY
+  EMPLOYEE_PERFORMANCE
+  DEPARTMENT_ANALYTICS
+  MONTHLY_OVERVIEW
+  YEARLY_SUMMARY
+  CUSTOM
+}
+
+enum ReportStatus {
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
+  EXPIRED
+}
+
+
+model Notification {
+  id         Int               @id @default(autoincrement())
+  employeeId Int?
+  goalId     Int?
+  reportId   Int?              
+  title      String
+  message    String
+  type       NotificationType  @default(INFO)
+  isRead     Boolean           @default(false)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt           
+
+  employee   Employee?         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  goal       Goal?             @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  report     Reporting?        @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId, isRead])
+  @@index([type, createdAt])
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  SUCCESS
+  ERROR
+  REPORT_READY  
+}
+
+model Salary {
+  id            Int      @id @default(autoincrement())
+  employeeId    Int
+  baseSalary    Float
+  allowances    Float     @default(0)
+  deductions    Float     @default(0)
+  payDate       DateTime
+  overtimeHours Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  employee      Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+}
+
+model PerformanceReview {
+  id           Int      @id @default(autoincrement())
+  employeeId   Int
+  rating       Float
+  feedback     String
+  reviewDate   DateTime
+  reviewPeriod String
+  goals        String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+}
+
+
+
+
+enum Role {
+  ADMIN
+  TEAM_LEAD
+  EMPLOYEE
+}
+
+
+
+
+
+
+
+model Job {
+
+  id           String    @id @default(cuid())
+
+  title        String
+
+  department   String
+
+  description  String?   @db.Text
+
+  requirements Json? 
+
+  salary       String?
+
+  location     String
+
+  status       JobStatus @default(ACTIVE)
+
+  applicants   Int       @default(0)
+
+  postedDate   DateTime  @default(now())
+
+  createdAt    DateTime  @default(now())
+
+  updatedAt    DateTime  @updatedAt
+
+
+
+
+
+  applications Application[]
+
+
+
+  @@map("jobs")
+
+}
+
+
+
+model Candidate {
+
+  id             String   @id @default(cuid())
+
+  name           String
+
+  email          String   @unique
+
+  phone          String?
+
+  experience     String?
+
+  skills         Json? 
+
+  rating         Float?   @default(0.0)
+
+  source         String?  @default("Website")
+
+  cvPath         String? 
+
+  cvOriginalName String? 
+  createdAt      DateTime @default(now())
+
+  updatedAt      DateTime @updatedAt
+
+
+
+
+
+  applications Application[]
+
+  interviews   Interview[]
+
+
+
+  @@map("candidates")
+
+}
+
+
+
+model Application {
+
+  id          String            @id @default(cuid())
+
+  candidateId String
+
+  jobId       String
+
+  status      ApplicationStatus @default(NEW)
+
+  coverLetter String?           @db.Text
+
+  appliedDate DateTime          @default(now())
+
+  createdAt   DateTime          @default(now())
+
+  updatedAt   DateTime          @updatedAt
+
+
+
+  
+
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  job       Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+
+
+
+
+  @@unique([candidateId, jobId])
+
+  @@map("applications")
+
+}
+
+
+
+model Interview {
+
+  id          String          @id @default(cuid())
+
+  candidateId String
+
+  title       String
+
+  description String?         @db.Text
+
+  type        InterviewType
+
+  date        DateTime
+
+  time        String
+
+  duration    String?
+
+  location    String?
+
+  interviewer String?
+
+  notes       String?         @db.Text
+
+  status      InterviewStatus @default(SCHEDULED)
+
+  createdAt   DateTime        @default(now())
+
+  updatedAt   DateTime        @updatedAt
+
+
+
+
+
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+
+
+  @@map("interviews")
+
+}
+
+
+
+enum JobStatus {
+
+  ACTIVE
+
+  DRAFT
+
+  CLOSED
+
+}
+
+
+
+enum ApplicationStatus {
+
+  NEW
+
+  SCREENING
+
+  INTERVIEW
+
+  OFFER
+
+  REJECTED
+
+  HIRED
+
+}
+
+
+
+enum InterviewType {
+
+  PHONE
+
+  VIDEO
+
+  IN_PERSON
+
+  TECHNICAL
+
+  HR
+
+}
+
+
+
+enum InterviewStatus {
+
+  SCHEDULED
+
+  COMPLETED
+
+  CANCELLED
+
+  RESCHEDULED
+
+}
