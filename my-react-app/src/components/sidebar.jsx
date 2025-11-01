@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "./Sidebar.css";
+import "./sidebar.css";
 import { MdFeaturedPlayList, MdOutlinePerson, MdPayments, MdDashboardCustomize } from "react-icons/md";
 import { BsPerson } from "react-icons/bs";
 import { AiOutlineLogout } from "react-icons/ai";
@@ -186,3 +186,4 @@ const Sidebar = ({ onLogout }) => {
 };
 
 export default Sidebar;
+
