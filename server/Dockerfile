@@ -12,9 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY package*.json ./
 RUN npm ci
 
-# Prisma schema & client
+# Copy Prisma schema (no generate yet)
 COPY prisma ./prisma
-RUN npx prisma generate
 
 # App source
 COPY . .
@@ -26,5 +25,5 @@ ENV NODE_ENV=production
 ENV PORT=5000
 EXPOSE 5000
 
-# Apply pending migrations, then start
-CMD sh -c "npx prisma migrate deploy && node index.js"
+# Generate client + run migrations at runtime (envs are available), then start
+CMD sh -c "npx prisma generate && npx prisma migrate deploy && node index.js"
